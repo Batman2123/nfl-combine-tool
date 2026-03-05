@@ -1,0 +1,4751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NFL Combine Comparison Tool</title>
+  <meta name="description" content="Find out where you stack up against NFL Draft prospects. Enter your combine measurements and get your draft scouting card.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <style>
+/* =========================================================
+   NFL Combine Comparison Tool — Style Sheet
+   Design: NFL Draft Scouting Card aesthetic
+   ========================================================= */
+
+/* ---------- Design Tokens ---------- */
+:root {
+  --bg-primary:     #0a1628;
+  --bg-card:        #132038;
+  --bg-input:       #1a2d4a;
+  --gold:           #c8a83d;
+  --gold-light:     #e8c85d;
+  --text-primary:   #ffffff;
+  --text-secondary: #9ab0cc;
+  --grade-elite:    #00c851;
+  --grade-good:     #7db56a;
+  --grade-average:  #ffd700;
+  --grade-below:    #ff6b35;
+  --grade-poor:     #ff1744;
+  --border-subtle:  #1e3a5f;
+  --font-display:   'Bebas Neue', Impact, 'Arial Narrow', sans-serif;
+  --font-body:      'Inter', system-ui, -apple-system, sans-serif;
+  --radius:         8px;
+  --radius-lg:      14px;
+  --transition:     0.25s ease;
+}
+
+/* ---------- Reset & Base ---------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ---------- Screens ---------- */
+.screen {
+  display: none;
+  min-height: 100vh;
+}
+.screen.active {
+  display: block;
+  animation: fadeInUp 0.35s ease forwards;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Typography ---------- */
+h1, h2, h3, .display { font-family: var(--font-display); letter-spacing: 0.04em; }
+
+.section-heading {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--gold);
+  letter-spacing: 0.06em;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--border-subtle);
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+  text-decoration: none;
+}
+.btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+.btn-gold {
+  background: var(--gold);
+  color: #0a1628;
+}
+.btn-gold:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(200,168,61,0.4); }
+.btn-outline {
+  background: transparent;
+  color: var(--gold);
+  border: 1.5px solid var(--gold);
+}
+.btn-outline:hover { background: rgba(200,168,61,0.1); }
+.btn-ghost {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border: 1.5px solid var(--border-subtle);
+}
+.btn-ghost:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+
+/* ---------- Screen 1: Landing ---------- */
+#screen-landing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+  padding: 40px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 49px,
+      rgba(200,168,61,0.05) 50px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 49px,
+      rgba(200,168,61,0.04) 50px
+    );
+  pointer-events: none;
+}
+
+.landing-field {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg,
+      transparent 0%, transparent 48%,
+      rgba(200,168,61,0.08) 48.5%, rgba(200,168,61,0.08) 51.5%,
+      transparent 52% transparent 100%
+    );
+  pointer-events: none;
+}
+
+.landing-content {
+  position: relative;
+  z-index: 2;
+  max-width: 680px;
+}
+
+.landing-eyebrow {
+  font-family: var(--font-body);
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.landing-title {
+  font-family: var(--font-display);
+  font-size: clamp(52px, 10vw, 96px);
+  line-height: 0.95;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  text-shadow: 0 4px 30px rgba(200,168,61,0.15);
+}
+
+.landing-title span { color: var(--gold); }
+
+.landing-subtitle {
+  font-size: 18px;
+  color: var(--text-secondary);
+  margin-bottom: 40px;
+}
+
+.landing-divider {
+  width: 80px;
+  height: 3px;
+  background: var(--gold);
+  margin: 0 auto 40px;
+  border-radius: 2px;
+}
+
+.landing-cta {
+  font-size: 22px;
+  padding: 18px 44px;
+  margin-bottom: 40px;
+}
+
+.landing-footer {
+  font-size: 12px;
+  color: #4a6080;
+  letter-spacing: 0.05em;
+}
+
+/* Yard line graphic */
+.yard-lines {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.yard-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(200,168,61,0.06);
+}
+
+/* ---------- Screen 2: Position Selection ---------- */
+#screen-position {
+  min-height: 100vh;
+  padding: 60px 24px 40px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.screen-heading {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 6vw, 60px);
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.screen-subheading {
+  color: var(--text-secondary);
+  margin-bottom: 40px;
+  font-size: 15px;
+}
+
+.position-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.position-card {
+  background: var(--bg-card);
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 28px 16px 22px;
+  cursor: pointer;
+  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition), background var(--transition);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+.position-card:hover,
+.position-card:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(200,168,61,0.25), 0 8px 24px rgba(0,0,0,0.4);
+  transform: scale(1.03);
+  outline: none;
+}
+.position-card.selected {
+  border-color: var(--gold);
+  background: rgba(200,168,61,0.1);
+  box-shadow: 0 0 0 3px rgba(200,168,61,0.3);
+}
+.pos-emoji { font-size: 36px; line-height: 1; }
+.pos-abbr  { font-family: var(--font-display); font-size: 48px; color: var(--gold); line-height: 1; }
+.pos-name  { font-size: 12px; color: var(--text-secondary); letter-spacing: 0.05em; text-transform: uppercase; }
+
+.nav-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+/* ---------- Screen 3: Form ---------- */
+#screen-form {
+  min-height: 100vh;
+  padding: 40px 24px 120px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+/* Progress bar */
+.progress-wrap {
+  margin-bottom: 36px;
+}
+.progress-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.progress-bar-track {
+  height: 4px;
+  background: var(--border-subtle);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+/* Accordion */
+.accordion-item {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: border-color var(--transition);
+}
+.accordion-item.open {
+  border-color: rgba(200,168,61,0.3);
+}
+.accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 600;
+  font-size: 15px;
+  transition: background var(--transition);
+}
+.accordion-header:hover { background: rgba(255,255,255,0.03); }
+.accordion-icon { font-size: 18px; transition: transform 0.25s; }
+.accordion-item.open .accordion-icon { transform: rotate(180deg); }
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+.accordion-item.open .accordion-content { max-height: 1200px; }
+.accordion-body { padding: 4px 20px 20px; }
+
+/* Form Fields */
+.field-group {
+  margin-bottom: 18px;
+}
+.field-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 7px;
+  font-weight: 600;
+}
+.field-tip {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 0;
+  line-height: 1;
+}
+.field-tip:hover { color: var(--gold); }
+
+input[type="text"],
+input[type="number"] {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 15px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  appearance: none;
+  -webkit-appearance: none;
+}
+input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(200,168,61,0.15);
+}
+input.invalid {
+  border-color: var(--grade-poor);
+  box-shadow: 0 0 0 3px rgba(255,23,68,0.15);
+}
+input::placeholder { color: #4a6080; }
+
+select {
+  padding: 12px 14px;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 15px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%239ab0cc' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+select:focus { outline: none; border-color: var(--gold); }
+
+.height-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.field-error {
+  display: block;
+  font-size: 12px;
+  color: var(--grade-poor);
+  margin-top: 5px;
+}
+
+.field-hint {
+  font-size: 11px;
+  color: #4a6080;
+  margin-top: 5px;
+  line-height: 1.5;
+}
+
+/* 1RM Calculator */
+.rm-toggle-wrap { margin-top: 16px; }
+#rm-toggle {
+  background: none;
+  border: 1.5px dashed var(--border-subtle);
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 10px 14px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: border-color var(--transition), color var(--transition);
+}
+#rm-toggle:hover { border-color: var(--gold); color: var(--gold); }
+#rm-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+#rm-panel.open { max-height: 400px; }
+.rm-panel-body {
+  background: rgba(200,168,61,0.05);
+  border: 1px solid rgba(200,168,61,0.15);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-top: 10px;
+}
+.rm-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+#rm-result {
+  font-size: 14px;
+  color: var(--gold);
+  margin: 10px 0;
+  min-height: 20px;
+}
+#btn-apply-rm { display: none; margin-top: 6px; }
+
+/* Form Bottom */
+.form-actions {
+  margin-top: 32px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ---------- Screen 4: Results ---------- */
+#screen-results {
+  min-height: 100vh;
+  padding-bottom: 120px;
+}
+
+/* Player Header */
+.player-header {
+  background: var(--bg-card);
+  border-bottom: 3px solid var(--gold);
+  padding: 28px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.ph-left { flex: 1; min-width: 200px; }
+.ph-name {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 56px);
+  line-height: 1;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+.ph-position-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border: 1.5px solid var(--gold);
+  border-radius: 100px;
+  font-size: 12px;
+  color: var(--gold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.ph-hw {
+  font-size: 14px;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+}
+.ph-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 120px;
+}
+.grade-ring-wrap {
+  position: relative;
+  width: 100px;
+  height: 60px;
+}
+#grade-ring-canvas { width: 100% !important; height: auto !important; }
+.ph-grade-letter {
+  font-family: var(--font-display);
+  font-size: 56px;
+  line-height: 1;
+  color: var(--gold);
+  margin-top: -10px;
+}
+.ph-grade-label {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* Results Content */
+.results-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+/* Two-column layout */
+.results-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  margin-bottom: 40px;
+}
+
+.results-section {
+  margin-bottom: 48px;
+}
+
+/* Scouting Card */
+#scouting-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  padding: 24px;
+}
+.sc-card-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--gold);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.sc-player-name {
+  font-family: var(--font-display);
+  font-size: 36px;
+  color: var(--text-primary);
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+.sc-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.sc-pos-badge {
+  background: rgba(200,168,61,0.15);
+  color: var(--gold);
+  border: 1px solid rgba(200,168,61,0.4);
+  border-radius: 100px;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+.sc-meta-item {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.sc-position-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  font-style: italic;
+}
+.sc-stats-heading {
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 12px;
+  margin-top: 18px;
+}
+.sc-stat-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.sc-stat-name  { font-size: 13px; color: var(--text-secondary); }
+.sc-stat-value { font-family: var(--font-display); font-size: 20px; color: var(--gold); text-align: right; }
+.sc-stat-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 100px;
+  border: 1px solid;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.sc-stat-grade { font-family: var(--font-display); font-size: 18px; text-align: right; }
+
+.sc-comp-label {
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  margin-top: 20px;
+  margin-bottom: 8px;
+}
+.sc-comp-bar-wrap {
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  height: 8px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.sc-comp-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1s ease;
+}
+.sc-comp-grade {
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+/* Stat Comparison Chart */
+#stat-comparison-section {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
+.chart-heading {
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.chart-wrap {
+  position: relative;
+  min-height: 220px;
+}
+.bar-chart-wrap {
+  position: relative;
+}
+
+/* Radar */
+#radar-section {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  text-align: center;
+}
+#radar-chart-wrap { max-width: 500px; margin: 0 auto; }
+#radar-unlock-msg {
+  display: none;
+  color: var(--text-secondary);
+  font-style: italic;
+  padding: 40px 0;
+}
+
+/* HOF Legends */
+#legends-section {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+}
+.legends-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+.legend-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.legend-card.cross-pos { border-color: rgba(200,168,61,0.2); }
+.legend-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.legend-initials {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  flex-shrink: 0;
+  color: #fff;
+}
+.legend-name { font-weight: 700; font-size: 15px; margin-bottom: 2px; }
+.legend-pos-era { font-size: 12px; color: var(--text-secondary); }
+
+.legend-deltas { margin-bottom: 12px; }
+.legend-delta {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 12.5px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.ld-medal { flex-shrink: 0; }
+.ld-stat  { flex: 1; color: var(--text-secondary); }
+.ld-stat strong { color: var(--text-primary); }
+.ld-diff  { font-size: 11px; color: #4a6080; white-space: nowrap; }
+
+.legend-no-data {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-bottom: 12px;
+}
+.legend-note {
+  font-size: 12px;
+  color: #4a6080;
+  line-height: 1.5;
+}
+
+/* Leaderboard */
+#leaderboard-section {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+}
+.lb-stat-block {
+  margin-bottom: 36px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.lb-stat-block:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.lb-stat-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--gold);
+  margin-bottom: 14px;
+  letter-spacing: 0.04em;
+}
+.lb-record-row {
+  display: grid;
+  grid-template-columns: 36px 1fr 52px 80px 56px;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 13px;
+}
+.lb-rank  { font-family: var(--font-display); font-size: 18px; color: var(--gold); }
+.lb-name  { font-weight: 600; }
+.lb-pos-tag {
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: var(--bg-input);
+  border-radius: 4px;
+  padding: 2px 6px;
+  text-align: center;
+}
+.lb-val  { font-family: var(--font-display); font-size: 18px; color: var(--text-primary); text-align: right; }
+.lb-year { font-size: 11px; color: #4a6080; text-align: right; }
+.lb-user-row { margin-top: 14px; }
+.lb-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.lb-mini-bar-track {
+  position: relative;
+  height: 8px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  overflow: visible;
+}
+.lb-mini-bar-fill {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 4px;
+  min-width: 4px;
+  max-width: 100%;
+}
+.lb-user-marker {
+  position: absolute;
+  top: -4px;
+  width: 3px;
+  height: 16px;
+  background: var(--gold-light);
+  border-radius: 2px;
+  transform: translateX(-50%);
+}
+
+/* Training */
+#training-section {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+}
+.training-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+.training-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.training-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.training-stat-name {
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 0.04em;
+}
+.training-percentile {
+  font-family: var(--font-display);
+  font-size: 18px;
+}
+.training-gap {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.training-gap strong { color: var(--text-primary); }
+.training-drills { margin-bottom: 14px; }
+.training-drill { margin-bottom: 12px; }
+.drill-name { font-weight: 700; font-size: 14px; margin-bottom: 3px; }
+.drill-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+.pro-tip-box {
+  background: rgba(200,168,61,0.08);
+  border: 1px solid rgba(200,168,61,0.2);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.pro-tip-box strong { color: var(--gold); }
+
+/* Jerry Rice Easter Egg */
+#jerry-rice-easter-egg {
+  display: none;
+  background: rgba(255,215,0,0.06);
+  border: 1.5px solid rgba(255,215,0,0.3);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+#jerry-rice-easter-egg .egg-emoji { font-size: 20px; margin-right: 8px; }
+
+/* Action Buttons Bar */
+.action-bar {
+  position: sticky;
+  bottom: 0;
+  background: rgba(10,22,40,0.96);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border-subtle);
+  padding: 16px 24px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  z-index: 100;
+}
+.action-bar .btn { font-size: 14px; padding: 11px 20px; }
+
+/* ---------- Share Card (off-screen) ---------- */
+#share-card {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 600px;
+  height: 900px;
+  background: #0a1628;
+  border: 3px solid #c8a83d;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 36px 40px 24px;
+  font-family: var(--font-body);
+  overflow: hidden;
+}
+.share-header {
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  border-bottom: 1px solid rgba(200,168,61,0.3);
+  padding-bottom: 12px;
+  width: 100%;
+  text-align: center;
+}
+.share-player {
+  font-family: var(--font-display);
+  font-size: 52px;
+  color: var(--text-primary);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-align: center;
+}
+.share-pos-badge {
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.share-grade-wrap { text-align: center; }
+.share-grade {
+  font-family: var(--font-display);
+  font-size: 100px;
+  line-height: 1;
+  text-shadow: 0 0 40px rgba(200,168,61,0.4);
+}
+.share-grade-label {
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+.share-stats {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sc-share-stat {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 10px;
+  align-items: center;
+  font-size: 13px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.sc-share-stat-label { color: var(--text-secondary); }
+.sc-share-stat-val   { font-family: var(--font-display); font-size: 18px; color: var(--gold); }
+.sc-share-stat-pct   { font-size: 12px; font-weight: 700; }
+.sc-share-vs         { font-size: 11px; color: #4a6080; }
+.share-watermark {
+  font-size: 11px;
+  color: #2a4060;
+  letter-spacing: 0.1em;
+}
+
+/* ---------- Tooltip ---------- */
+.tooltip-popup {
+  position: absolute;
+  z-index: 9999;
+  background: #0f2040;
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 12.5px;
+  max-width: 260px;
+  line-height: 1.5;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  pointer-events: none;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .sp-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .avg-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .avg-header-row { display: none; }
+  .avg-stat-name { grid-column: 1 / -1; font-weight: 700; color: var(--text-primary); }
+  .results-two-col {
+    grid-template-columns: 1fr;
+  }
+  .position-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .pos-abbr { font-size: 36px; }
+  .pos-emoji { font-size: 28px; }
+  .player-header {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+  }
+  .ph-left { text-align: center; }
+  .ph-right { flex-direction: row; gap: 12px; align-items: center; }
+  .lb-record-row {
+    grid-template-columns: 30px 1fr 44px 60px;
+  }
+  .lb-year { display: none; }
+  .action-bar {
+    gap: 8px;
+    padding: 12px 16px;
+  }
+  .action-bar .btn { flex: 1; min-width: 140px; justify-content: center; font-size: 13px; padding: 10px 12px; }
+  .legends-grid { grid-template-columns: 1fr; }
+  .training-grid { grid-template-columns: 1fr; }
+  #athlete-match-bar { flex-direction: column; gap: 10px; }
+  .am-left { min-width: unset; }
+  .era-controls-wrap { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .era-select { max-width: 100%; }
+  .pc-row { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .pc-stat-name { grid-column: 1 / -1; font-weight: 700; color: var(--text-primary); font-size: 12px; }
+  .pc-header-row { display: none; }
+  .pc-diff { grid-column: 1 / -1; font-size: 12px; }
+  .pc-select { max-width: 100%; }
+  .pc-grade-row { flex-direction: column; gap: 6px; }
+}
+
+@media (max-width: 480px) {
+  .position-grid { gap: 8px; }
+  .pos-abbr { font-size: 28px; }
+  .pos-emoji { font-size: 22px; }
+  .pos-name  { font-size: 10px; }
+  .position-card { padding: 18px 8px 14px; }
+  .sc-stat-row { grid-template-columns: 1fr auto auto; }
+  .sc-stat-grade { display: none; }
+}
+
+/* ---------- Size Profile ---------- */
+.sp-section {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+}
+.sp-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.sp-card {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sp-card-label {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+.sp-card-value {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--gold);
+  line-height: 1.1;
+}
+.sp-card-empty {
+  color: var(--text-secondary);
+  font-size: 22px;
+}
+.sp-card-avg {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.sp-bar-track {
+  height: 5px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 2px;
+}
+.sp-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  min-width: 2px;
+  transition: width 0.8s ease;
+}
+.sp-percentile {
+  font-size: 12px;
+  font-weight: 700;
+}
+.sp-card-note {
+  font-size: 11px;
+  color: #4a6080;
+  line-height: 1.4;
+  font-style: italic;
+}
+
+/* ---------- You vs. Average ---------- */
+.avg-comparison-card {
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.avg-comparison-heading {
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.avg-comparison-table {
+  padding: 0 24px;
+}
+.avg-row {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr 1.6fr 1.6fr;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 14px;
+}
+.avg-row:last-child { border-bottom: none; }
+.avg-header-row {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 700;
+  padding-bottom: 8px;
+}
+.avg-stat-name { color: var(--text-secondary); }
+.avg-you { font-family: var(--font-display); font-size: 18px; color: var(--gold); }
+.avg-pos-avg { color: var(--text-primary); }
+.avg-pos-label { font-size: 11px; color: var(--text-secondary); }
+.avg-diff { font-weight: 600; font-size: 13px; }
+.avg-summary {
+  padding: 16px 24px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border-subtle);
+}
+.avg-summary strong { color: var(--text-primary); }
+
+/* ---------- Bar Chart Legend Key ---------- */
+.chart-legend-key {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.clk-item { display: flex; align-items: center; gap: 5px; }
+.clk-dash  { color: rgba(255,255,255,0.6); letter-spacing: -1px; }
+.clk-triangle { color: #00c851; }
+.clk-square   { color: var(--gold); }
+
+/* ---------- Early Era Footnote ---------- */
+.early-era-footnote {
+  margin-top: 16px;
+  font-size: 12px;
+  color: #4a6080;
+  font-style: italic;
+}
+
+/* ---------- Athlete Match Bar ---------- */
+#athlete-match-bar {
+  width: 100%;
+  background: rgba(200,168,61,0.06);
+  border: 1px solid rgba(200,168,61,0.2);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-top: 12px;
+}
+.am-left { flex-shrink: 0; min-width: 160px; }
+.am-right { flex: 1; min-width: 0; }
+.am-eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.am-name {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--text-primary);
+  line-height: 1.1;
+  margin-bottom: 5px;
+}
+.am-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.am-pos-badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #fff;
+  border-radius: 100px;
+  padding: 2px 9px;
+}
+.am-era {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.am-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  font-style: italic;
+  margin-top: 4px;
+}
+
+/* ---------- Era Comparison Controls ---------- */
+.era-controls-wrap {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.era-label {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.era-select {
+  flex: 1;
+  min-width: 200px;
+  max-width: 340px;
+}
+.era-disclaimer {
+  width: 100%;
+  font-size: 11px;
+  color: #4a6080;
+  font-style: italic;
+  margin-top: 2px;
+}
+
+/* ---------- Training Progress Bar ---------- */
+.training-progress-wrap {
+  margin: 12px 0 16px;
+}
+.training-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+}
+.training-progress-track {
+  position: relative;
+  height: 8px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  overflow: visible;
+}
+.training-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  min-width: 4px;
+  max-width: 100%;
+  transition: width 0.8s ease;
+}
+.training-elite-marker {
+  position: absolute;
+  top: -4px;
+  width: 2px;
+  height: 16px;
+  background: var(--grade-elite);
+  border-radius: 1px;
+  transform: translateX(-50%);
+}
+.training-more-msg {
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+  text-align: center;
+  padding: 12px 16px;
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius);
+}
+
+/* ---------- Leaderboard Record Note ---------- */
+.lb-record-note {
+  font-size: 11px;
+  color: #4a6080;
+  font-style: italic;
+  margin: -4px 0 6px 36px;
+  line-height: 1.4;
+}
+.lb-forty-note {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin: 8px 0 4px;
+  line-height: 1.5;
+}
+.badge-2026 {
+  background: #c8a83d;
+  color: #0a1628;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.pc-proday-note {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin: 4px 20px 0;
+}
+
+/* ---------- Player Comparison Tool ---------- */
+#player-compare-section {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+}
+.pc-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.pc-label {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.pc-select {
+  flex: 1;
+  min-width: 240px;
+  max-width: 420px;
+}
+.pc-empty {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-style: italic;
+  text-align: center;
+  padding: 24px 0;
+}
+.pc-card {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.pc-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: rgba(200,168,61,0.07);
+  border-bottom: 1px solid var(--border-subtle);
+  flex-wrap: wrap;
+}
+.pc-you-label {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--gold);
+}
+.pc-vs {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+.pc-them-label {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--text-primary);
+}
+.pc-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1.6fr;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 14px;
+}
+.pc-row:last-of-type { border-bottom: none; }
+.pc-header-row {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 700;
+  background: rgba(255,255,255,0.02);
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+.pc-stat-name { color: var(--text-secondary); }
+.pc-you  { font-family: var(--font-display); font-size: 18px; color: var(--gold); }
+.pc-them { font-family: var(--font-display); font-size: 18px; color: var(--text-primary); }
+.pc-na   { color: #4a6080; font-style: italic; font-size: 14px; }
+.pc-diff { font-weight: 600; font-size: 13px; }
+.pc-nodata { color: #4a6080; font-style: italic; font-weight: 400; }
+.pc-grade-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.pc-cross-note {
+  margin: 0 20px;
+  padding: 8px 12px;
+  background: rgba(200,168,61,0.06);
+  border-left: 3px solid rgba(200,168,61,0.4);
+  border-radius: 0 4px 4px 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+.pc-funfact {
+  margin: 12px 20px 16px;
+  font-size: 13px;
+  color: var(--gold);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* ---------- Print ---------- */
+@media print {
+  body { background: #fff; color: #000; }
+  .screen { display: none !important; }
+  #screen-results { display: block !important; background: #fff; }
+  .action-bar { display: none !important; }
+  .player-header { background: #f5f5f5; border-bottom: 2px solid #c8a83d; }
+  .section-heading, .sc-card-eyebrow, .chart-heading { color: #c8a83d; }
+  #scouting-card, #stat-comparison-section, #legends-section, #training-section {
+    border: 1px solid #ddd;
+    background: #fff;
+    break-inside: avoid;
+    margin-bottom: 16px;
+  }
+  #radar-section { break-inside: avoid; }
+  .legend-card, .training-card { background: #f9f9f9; }
+}
+
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 1: LANDING
+═══════════════════════════════════════ -->
+<div id="screen-landing" class="screen active">
+  <!-- Decorative yard lines -->
+  <div class="landing-bg"></div>
+  <div class="yard-lines" aria-hidden="true">
+    <div class="yard-line" style="left:10%"></div>
+    <div class="yard-line" style="left:20%"></div>
+    <div class="yard-line" style="left:30%"></div>
+    <div class="yard-line" style="left:40%"></div>
+    <div class="yard-line" style="left:50%"></div>
+    <div class="yard-line" style="left:60%"></div>
+    <div class="yard-line" style="left:70%"></div>
+    <div class="yard-line" style="left:80%"></div>
+    <div class="yard-line" style="left:90%"></div>
+  </div>
+
+  <div class="landing-content">
+    <div class="landing-eyebrow">NFL Draft Scouting</div>
+    <h1 class="landing-title">
+      NFL<br>
+      <span>COMBINE</span><br>
+      COMPARISON<br>
+      TOOL
+    </h1>
+    <div class="landing-divider"></div>
+    <p class="landing-subtitle">Find out where you stack up against the pros.</p>
+    <button id="btn-start" class="btn btn-gold landing-cta">START YOUR COMBINE →</button>
+    <p class="landing-footer">Powered by historical NFL Combine data (2000–2025)</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 2: POSITION SELECTION
+═══════════════════════════════════════ -->
+<div id="screen-position" class="screen">
+  <div style="max-width:900px;margin:0 auto;padding:60px 24px 40px;">
+    <h2 class="screen-heading">SELECT YOUR POSITION</h2>
+    <p class="screen-subheading">Choose the position you play or want to evaluate.</p>
+
+    <div id="position-grid" class="position-grid" role="group" aria-label="Position selection"></div>
+
+    <div class="nav-row">
+      <button id="btn-back-to-landing" class="btn btn-ghost">← Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 3: INPUT FORM
+═══════════════════════════════════════ -->
+<div id="screen-form" class="screen">
+  <div style="max-width:680px;margin:0 auto;padding:40px 24px 120px;">
+
+    <!-- Progress bar -->
+    <div class="progress-wrap">
+      <div class="progress-label">Step 2 of 3 — Your Measurements</div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" style="width:66%"></div>
+      </div>
+    </div>
+
+    <h2 class="screen-heading">YOUR COMBINE<br>MEASUREMENTS</h2>
+    <p class="screen-subheading">Enter what you've got — skip anything you haven't tested.</p>
+
+    <!-- Section 1: Player Info -->
+    <div class="accordion-item open">
+      <div class="accordion-header">
+        <span>👤 Player Info</span>
+        <span class="accordion-icon">▼</span>
+      </div>
+      <div class="accordion-content">
+        <div class="accordion-body">
+          <div class="field-group">
+            <label class="field-label" for="input-name">Name <span style="color:#ff6b35">*</span></label>
+            <input type="text" id="input-name" placeholder="Your Name" autocomplete="off" required>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="input-age">
+              Age
+              <button class="field-tip" data-tip="Optional. Age is tracked at the NFL Combine — most prospects are 21–24." aria-label="Info">ℹ️</button>
+            </label>
+            <input type="number" id="input-age" placeholder="e.g. 22" min="14" max="45" step="1">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Size & Body -->
+    <div class="accordion-item">
+      <div class="accordion-header">
+        <span>📏 Size &amp; Body Composition</span>
+        <span class="accordion-icon">▼</span>
+      </div>
+      <div class="accordion-content">
+        <div class="accordion-body">
+          <div class="field-group">
+            <label class="field-label">
+              Height
+              <button class="field-tip" data-tip="Measured in shoes at the NFL Combine. Height expectations vary significantly by position." aria-label="Info">ℹ️</button>
+            </label>
+            <div class="height-row">
+              <select id="height-ft" aria-label="Feet"></select>
+              <select id="height-in" aria-label="Inches"></select>
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="input-weight">
+              Weight (lbs)
+              <button class="field-tip" data-tip="Measured in underwear at the NFL Combine. Ideal weight range varies significantly by position." aria-label="Info">ℹ️</button>
+            </label>
+            <input type="number" id="input-weight" placeholder="e.g. 215" min="130" max="400" step="0.5">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="input-arm">
+              Arm Length (inches, optional)
+            </label>
+            <input type="number" id="input-arm" placeholder="e.g. 32.5" min="26" max="40" step="0.125">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="input-hand">
+              Hand Size (inches, optional)
+            </label>
+            <input type="number" id="input-hand" placeholder="e.g. 9.5" min="7" max="12" step="0.125">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Speed & Agility -->
+    <div class="accordion-item">
+      <div class="accordion-header">
+        <span>⚡ Speed &amp; Agility</span>
+        <span class="accordion-icon">▼</span>
+      </div>
+      <div class="accordion-content">
+        <div class="accordion-body">
+          <div class="field-group">
+            <label class="field-label" for="input-forty">
+              40-Yard Dash (seconds)
+              <button class="field-tip" data-tip="Time to sprint 40 yards from a standing start. Scouts use this to measure raw speed and explosiveness. Faster is better." aria-label="Info">ℹ️</button>
+            </label>
+            <input type="number" id="input-forty" placeholder="e.g. 4.52" min="4.0" max="6.5" step="0.01">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="input-threecone">
+              3-Cone Drill (seconds)
+              <button class="field-tip" data-tip="Player sprints 5 yds to cone, back 5 yds, then cuts figure-8 around cones. Measures change-of-direction quickness. Faster is better." aria-label="Info">ℹ️</button>
+            </label>
+            <input type="number" id="input-threecone" placeholder="e.g. 6.98" min="6.0" max="9.0" step="0.01">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="input-shuttle">
+              20-Yard Shuttle (seconds)
+              <button class="field-tip" data-tip="5-10-5 drill: sprint 5 yds right, 10 yds left, 5 yds back. Tests lateral burst and deceleration. Faster is better." aria-label="Info">ℹ️</button>
+            </label>
+            <input type="number" id="input-shuttle" placeholder="e.g. 4.28" min="3.7" max="5.5" step="0.01">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: Jumps -->
+    <div class="accordion-item">
+      <div class="accordion-header">
+        <span>🦘 Jumps</span>
+        <span class="accordion-icon">▼</span>
+      </div>
+      <div class="accordion-content">
+        <div class="accordion-body">
+          <div class="field-group">
+            <label class="field-label" for="input-vertical">
+              Vertical Jump (inches)
+              <button class="field-tip" data-tip="Standing vertical leap measured from fingertip reach. Tests explosive lower-body power and hip drive. Higher is better." aria-label="Info">ℹ️</button>
+            </label>
+            <input type="number" id="input-vertical" placeholder="e.g. 36.5" min="20" max="50" step="0.5">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="input-broad">
+              Broad Jump (total inches)
+              <button class="field-tip" data-tip="Standing horizontal jump measured in total inches. Tests horizontal power and takeoff mechanics. Further is better." aria-label="Info">ℹ️</button>
+            </label>
+            <input type="number" id="input-broad" placeholder="e.g. 120" min="70" max="150" step="1">
+            <span class="field-hint">10'0" = 120 in &nbsp;|&nbsp; 10'6" = 126 in &nbsp;|&nbsp; 11'0" = 132 in</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 5: Strength -->
+    <div class="accordion-item">
+      <div class="accordion-header">
+        <span>💪 Strength</span>
+        <span class="accordion-icon">▼</span>
+      </div>
+      <div class="accordion-content">
+        <div class="accordion-body">
+          <div class="field-group">
+            <label class="field-label" for="input-bench">
+              Bench Press at 225 lbs (reps)
+              <button class="field-tip" data-tip="Number of reps at exactly 225 lbs. Measures upper-body strength endurance. More reps is better." aria-label="Info">ℹ️</button>
+            </label>
+            <input type="number" id="input-bench" placeholder="e.g. 22" min="1" max="55" step="1">
+          </div>
+
+          <!-- 1RM Calculator -->
+          <div class="rm-toggle-wrap">
+            <button id="rm-toggle" type="button">
+              <span>🔢 Use 1RM Calculator instead</span>
+              <span class="rm-arrow">▼</span>
+            </button>
+            <div id="rm-panel">
+              <div class="rm-panel-body">
+                <div class="rm-row">
+                  <div class="field-group" style="margin:0">
+                    <label class="field-label" for="rm-weight">Weight Lifted (lbs)</label>
+                    <input type="number" id="rm-weight" placeholder="e.g. 275" min="45" max="600" step="2.5">
+                  </div>
+                  <div class="field-group" style="margin:0">
+                    <label class="field-label" for="rm-reps-input">Reps Completed</label>
+                    <input type="number" id="rm-reps-input" placeholder="e.g. 8" min="1" max="60" step="1">
+                  </div>
+                </div>
+                <button id="btn-calc-rm" class="btn btn-outline" type="button" style="font-size:15px;padding:10px 20px;">CALCULATE</button>
+                <div id="rm-result"></div>
+                <button id="btn-apply-rm" class="btn btn-gold" type="button" style="font-size:14px;padding:9px 18px;">APPLY TO MY STATS</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button id="btn-generate" class="btn btn-gold" style="flex:1;justify-content:center;font-size:18px;" disabled>
+        GENERATE MY DRAFT CARD →
+      </button>
+    </div>
+    <div style="margin-top:16px;">
+      <button id="btn-back-to-position" class="btn btn-ghost">← Change Position</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 4: RESULTS
+═══════════════════════════════════════ -->
+<div id="screen-results" class="screen">
+
+  <!-- Player Header -->
+  <div class="player-header">
+    <div class="ph-left">
+      <div class="ph-name" id="res-name">PLAYER NAME</div>
+      <div class="ph-position-badge" id="res-position-badge">POSITION</div>
+      <div class="ph-hw" id="res-age-hw"></div>
+    </div>
+    <div class="ph-right">
+      <div class="grade-ring-wrap">
+        <canvas id="grade-ring-canvas" width="100" height="60"></canvas>
+      </div>
+      <div class="ph-grade-letter" id="res-grade-letter">—</div>
+      <div class="ph-grade-label" id="res-grade-label">OVERALL</div>
+    </div>
+  </div>
+  <!-- Athlete Match Bar (full-width, below name/grade) -->
+  <div id="athlete-match-bar" style="display:none"></div>
+
+  <!-- Main content -->
+  <div class="results-content">
+
+    <!-- Size Profile -->
+    <div id="size-profile-section" class="results-section"></div>
+
+    <!-- Jerry Rice Easter Egg -->
+    <div id="jerry-rice-easter-egg">
+      <span class="egg-emoji">🐐</span>
+      <strong>Did you know?</strong> Jerry Rice ran a 4.71 and is the greatest wide receiver of all time. Combine times don't tell the whole story — heart, hands, and work ethic matter more.
+    </div>
+
+    <!-- Two-column: Scouting Card + Bar Chart -->
+    <div class="results-two-col">
+
+      <!-- LEFT: Scouting Card -->
+      <div>
+        <div id="scouting-card">
+          <div class="sc-card-eyebrow">NFL COMBINE COMPARISON · SCOUTING REPORT</div>
+          <div id="scouting-card-header"></div>
+          <div class="sc-stats-heading">COMBINE SCORES</div>
+          <div id="scouting-stats"></div>
+          <div id="sc-composite-bar"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Bar Chart -->
+      <div id="stat-comparison-section">
+        <div class="chart-heading">PERCENTILE BREAKDOWN</div>
+        <div class="bar-chart-wrap">
+          <div class="chart-wrap" style="min-height:260px;">
+            <canvas id="bar-chart-canvas"></canvas>
+          </div>
+        </div>
+        <div class="chart-legend-key">
+          <span class="clk-item"><span class="clk-dash">— —</span> Position Average</span>
+          <span class="clk-item"><span class="clk-triangle">▲</span> Elite Benchmark</span>
+          <span class="clk-item"><span class="clk-square">■</span> You</span>
+        </div>
+      </div>
+
+    </div><!-- end two-col -->
+
+    <!-- Era Comparison Controls -->
+    <div id="era-controls-section" class="results-section" style="display:none">
+      <div class="era-controls-wrap">
+        <label class="era-label" for="era-select">COMPARE AGAINST:</label>
+        <select id="era-select" class="era-select">
+          <option value="2000-2025" selected>All-Time Average (2000–2025)</option>
+          <option value="2000-2007">Early 2000s Era (2000–2007)</option>
+          <option value="2008-2014">Late 2000s Era (2008–2014)</option>
+          <option value="2015-2019">Modern Era (2015–2019)</option>
+          <option value="2020-2025">Recent Era (2020–2025)</option>
+        </select>
+        <p class="era-disclaimer">Era averages are approximations based on historical combine trends.</p>
+      </div>
+    </div>
+
+    <!-- You vs. Average Combine Athlete -->
+    <div id="avg-comparison-section" class="results-section"></div>
+
+    <!-- Radar Chart -->
+    <div class="results-section">
+      <div id="radar-section">
+        <div class="section-heading">ATHLETIC PROFILE</div>
+        <p id="radar-unlock-msg">Enter at least 3 measurements to unlock your radar chart.</p>
+        <div id="radar-chart-wrap">
+          <canvas id="radar-canvas" width="500" height="500"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOF Legends -->
+    <div class="results-section">
+      <div id="legends-section">
+        <div class="section-heading">HOW YOU COMPARE TO NOTABLE & ALL-PRO PERFORMERS</div>
+        <div id="legends-grid" class="legends-grid"></div>
+      </div>
+    </div>
+
+    <!-- Leaderboard -->
+    <div class="results-section">
+      <div id="leaderboard-section">
+        <div class="section-heading">ALL-TIME TOP COMBINE PERFORMERS</div>
+        <div id="leaderboard-content"></div>
+      </div>
+    </div>
+
+    <!-- Training Recs -->
+    <div class="results-section">
+      <div id="training-section">
+        <div class="section-heading">YOUR TRAINING ROADMAP</div>
+        <div id="training-content" class="training-grid"></div>
+      </div>
+    </div>
+
+    <!-- Compare to Any Player -->
+    <div class="results-section">
+      <div id="player-compare-section">
+        <div class="section-heading">COMPARE TO ANY PERFORMER</div>
+        <div class="pc-controls">
+          <label class="pc-label" for="compare-player-select">SELECT A PLAYER:</label>
+          <select id="compare-player-select" class="pc-select"></select>
+        </div>
+        <div id="player-compare-card"></div>
+      </div>
+    </div>
+
+  </div><!-- end results-content -->
+
+  <!-- Sticky Action Bar -->
+  <div class="action-bar">
+    <button id="btn-pdf"   class="btn btn-outline">📄 DOWNLOAD PDF</button>
+    <button id="btn-share" class="btn btn-outline">📸 SAVE SHARE CARD</button>
+    <button id="btn-retry" class="btn btn-ghost">🔄 TRY ANOTHER POSITION</button>
+    <button id="btn-edit"  class="btn btn-ghost">✏️ EDIT MY STATS</button>
+  </div>
+
+</div><!-- end screen-results -->
+
+<!-- ═══════════════════════════════════════
+     HIDDEN SHARE CARD (for html2canvas)
+═══════════════════════════════════════ -->
+<div id="share-card" aria-hidden="true"></div>
+
+<!-- ═══════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+'use strict';
+
+// IMPORTANT: These position averages are fixed historical estimates (2000–2025).
+// They are NOT calculated from NOTABLE_PERFORMERS and must never be derived from that array.
+// Modifying NOTABLE_PERFORMERS has zero effect on these numbers.
+const COMBINE_DATA = {
+  QB: {
+    label: "Quarterback",
+    avg:   { forty: 4.83, vertical: 32.5, broad: 112, bench: 20, threeCone: 7.02, shuttle: 4.38, heightIn: 75, weightLbs: 225, armLengthIn: 32.5, handSizeIn: 9.8 },
+    elite: { forty: 4.47, vertical: 38.0, broad: 124, bench: 29, threeCone: 6.85, shuttle: 4.22, heightIn: 76, weightLbs: 222, armLengthIn: 33.0, handSizeIn: 10.2 },
+    compositeWeights: { forty: 0.25, vertical: 0.10, broad: 0.10, bench: 0.08, threeCone: 0.22, shuttle: 0.20, height: 0.05 }
+  },
+  RB: {
+    label: "Running Back",
+    avg:   { forty: 4.55, vertical: 35.0, broad: 117, bench: 19, threeCone: 6.95, shuttle: 4.25, heightIn: 70, weightLbs: 214, armLengthIn: 31.5, handSizeIn: 9.5 },
+    elite: { forty: 4.38, vertical: 41.0, broad: 128, bench: 27, threeCone: 6.72, shuttle: 4.10, heightIn: 71, weightLbs: 210, armLengthIn: 32.0, handSizeIn: 9.8 },
+    compositeWeights: { forty: 0.30, vertical: 0.12, broad: 0.12, bench: 0.08, threeCone: 0.18, shuttle: 0.18, height: 0.02 }
+  },
+  WR: {
+    label: "Wide Receiver",
+    avg:   { forty: 4.52, vertical: 36.0, broad: 120, bench: 14, threeCone: 6.98, shuttle: 4.27, heightIn: 72, weightLbs: 200, armLengthIn: 32.0, handSizeIn: 9.4 },
+    elite: { forty: 4.38, vertical: 42.0, broad: 132, bench: 22, threeCone: 6.75, shuttle: 4.10, heightIn: 73, weightLbs: 198, armLengthIn: 33.0, handSizeIn: 9.7 },
+    compositeWeights: { forty: 0.30, vertical: 0.15, broad: 0.12, bench: 0.05, threeCone: 0.18, shuttle: 0.18, height: 0.02 }
+  },
+  TE: {
+    label: "Tight End",
+    avg:   { forty: 4.75, vertical: 33.0, broad: 115, bench: 22, threeCone: 7.12, shuttle: 4.42, heightIn: 76, weightLbs: 252, armLengthIn: 33.5, handSizeIn: 10.0 },
+    elite: { forty: 4.55, vertical: 39.0, broad: 126, bench: 31, threeCone: 6.88, shuttle: 4.26, heightIn: 77, weightLbs: 248, armLengthIn: 34.5, handSizeIn: 10.4 },
+    compositeWeights: { forty: 0.25, vertical: 0.12, broad: 0.10, bench: 0.15, threeCone: 0.18, shuttle: 0.18, height: 0.02 }
+  },
+  OL: {
+    label: "Offensive Lineman",
+    avg:   { forty: 5.30, vertical: 27.0, broad: 100, bench: 25, threeCone: 7.80, shuttle: 4.80, heightIn: 77, weightLbs: 310, armLengthIn: 34.5, handSizeIn: 10.2 },
+    elite: { forty: 5.10, vertical: 33.0, broad: 110, bench: 36, threeCone: 7.45, shuttle: 4.60, heightIn: 78, weightLbs: 305, armLengthIn: 35.5, handSizeIn: 10.6 },
+    compositeWeights: { forty: 0.10, vertical: 0.08, broad: 0.08, bench: 0.35, threeCone: 0.15, shuttle: 0.15, height: 0.09 }
+  },
+  DL: {
+    label: "Defensive Lineman",
+    avg:   { forty: 4.90, vertical: 30.0, broad: 108, bench: 27, threeCone: 7.40, shuttle: 4.65, heightIn: 75, weightLbs: 285, armLengthIn: 33.5, handSizeIn: 10.1 },
+    elite: { forty: 4.72, vertical: 36.0, broad: 118, bench: 38, threeCone: 7.10, shuttle: 4.45, heightIn: 76, weightLbs: 280, armLengthIn: 34.5, handSizeIn: 10.4 },
+    compositeWeights: { forty: 0.18, vertical: 0.10, broad: 0.10, bench: 0.30, threeCone: 0.16, shuttle: 0.14, height: 0.02 }
+  },
+  LB: {
+    label: "Linebacker",
+    avg:   { forty: 4.72, vertical: 33.0, broad: 113, bench: 24, threeCone: 7.18, shuttle: 4.42, heightIn: 73, weightLbs: 240, armLengthIn: 32.5, handSizeIn: 9.8 },
+    elite: { forty: 4.55, vertical: 39.0, broad: 124, bench: 33, threeCone: 6.88, shuttle: 4.22, heightIn: 74, weightLbs: 235, armLengthIn: 33.5, handSizeIn: 10.1 },
+    compositeWeights: { forty: 0.22, vertical: 0.12, broad: 0.10, bench: 0.20, threeCone: 0.18, shuttle: 0.16, height: 0.02 }
+  },
+  DB: {
+    label: "Defensive Back",
+    avg:   { forty: 4.50, vertical: 35.0, broad: 118, bench: 16, threeCone: 6.88, shuttle: 4.20, heightIn: 71, weightLbs: 196, armLengthIn: 31.0, handSizeIn: 9.3 },
+    elite: { forty: 4.35, vertical: 42.0, broad: 130, bench: 23, threeCone: 6.65, shuttle: 4.05, heightIn: 72, weightLbs: 193, armLengthIn: 32.0, handSizeIn: 9.6 },
+    compositeWeights: { forty: 0.30, vertical: 0.14, broad: 0.12, bench: 0.06, threeCone: 0.20, shuttle: 0.16, height: 0.02 }
+  },
+  ST: {
+    label: "Special Teams / Kicker",
+    avg:   { forty: 4.65, vertical: 31.0, broad: 110, bench: 18, threeCone: 7.20, shuttle: 4.40, heightIn: 73, weightLbs: 210, armLengthIn: 32.0, handSizeIn: 9.6 },
+    elite: { forty: 4.50, vertical: 37.0, broad: 120, bench: 25, threeCone: 7.00, shuttle: 4.25, heightIn: 74, weightLbs: 208, armLengthIn: 32.5, handSizeIn: 9.9 },
+    compositeWeights: { forty: 0.20, vertical: 0.12, broad: 0.12, bench: 0.12, threeCone: 0.20, shuttle: 0.20, height: 0.04 }
+  }
+};
+
+// ─── ALL-TIME RECORDS (Source: NFL.com Official Combine Tracker) ───────────
+// All data from electronic timing era (1999+). Pre-1999 times are hand-timed
+// and not included in NFL.com's official database.
+// Broad jump stored in inches. 12'3" = 147", 12'2" = 146", 11'9" = 141", etc.
+const ALL_TIME_RECORDS = {
+  forty: [
+    { name: "Xavier Worthy",   pos: "WR", value: 4.21, year: 2024 },
+    { name: "John Ross",       pos: "WR", value: 4.22, year: 2017 },
+    { name: "Kalon Barnes",    pos: "CB", value: 4.23, year: 2022 },
+    { name: "Chris Johnson",   pos: "RB", value: 4.24, year: 2008 },
+    { name: "Brenen Thompson", pos: "WR", value: 4.26, year: 2026 },
+    { name: "DJ Turner II",    pos: "CB", value: 4.26, year: 2023 },
+    { name: "Riq Woolen",      pos: "CB", value: 4.26, year: 2022 },
+  ],
+  vertical: [
+    { name: "Eli Stowers",           pos: "TE", value: 45.5, year: 2026 },
+    { name: "Chris Conley",          pos: "WR", value: 45.0, year: 2015 },
+    { name: "Donald Washington",     pos: "CB", value: 45.0, year: 2009 },
+    { name: "Donovan Peoples-Jones", pos: "WR", value: 44.5, year: 2020 },
+    { name: "Byron Jones",           pos: "CB", value: 44.5, year: 2015 },
+    { name: "Quan Martin",           pos: "CB", value: 44.0, year: 2023 },
+    { name: "Juan Thornhill",        pos: "S",  value: 44.0, year: 2019 },
+    { name: "Obi Melifonwu",         pos: "S",  value: 44.0, year: 2017 },
+    { name: "A.J. Jefferson",        pos: "CB", value: 44.0, year: 2010 },
+  ],
+  broad: [
+    { name: "Byron Jones",           pos: "CB",  value: 147, year: 2015 },
+    { name: "Tyler Owens",           pos: "SAF", value: 146, year: 2024 },
+    { name: "Emanuel Hall",          pos: "WR",  value: 141, year: 2019 },
+    { name: "Juan Thornhill",        pos: "S",   value: 141, year: 2019 },
+    { name: "Obi Melifonwu",         pos: "S",   value: 141, year: 2017 },
+    { name: "Miles Boykin",          pos: "WR",  value: 140, year: 2019 },
+    { name: "Donovan Peoples-Jones", pos: "WR",  value: 139, year: 2020 },
+    { name: "Chris Conley",          pos: "WR",  value: 139, year: 2015 },
+    { name: "Jamie Collins",         pos: "LB",  value: 139, year: 2013 },
+    { name: "Nick Emmanwori",        pos: "SAF", value: 138, year: 2025 },
+  ],
+  threeCone: [
+    { name: "Jeff Maehl",        pos: "WR", value: 6.42, year: 2011 },
+    { name: "Buster Skrine",     pos: "CB", value: 6.44, year: 2011 },
+    { name: "David Long Jr.",    pos: "LB", value: 6.45, year: 2019 },
+    { name: "Scott Long",        pos: "WR", value: 6.45, year: 2010 },
+    { name: "Dane Sanzenbacher", pos: "WR", value: 6.46, year: 2011 },
+    { name: "Daniel Sorensen",   pos: "FS", value: 6.47, year: 2014 },
+    { name: "Zyon McCollum",     pos: "CB", value: 6.48, year: 2022 },
+    { name: "Terrence Toliver",  pos: "WR", value: 6.48, year: 2011 },
+    { name: "Devon Cajuste",     pos: "WR", value: 6.49, year: 2016 },
+  ],
+  shuttle: [
+    { name: "Brandin Cooks",   pos: "WR", value: 3.81, year: 2014 },
+    { name: "Jason Allen",     pos: "CB", value: 3.81, year: 2006 },
+    { name: "Bobby McCain",    pos: "CB", value: 3.82, year: 2015 },
+    { name: "B.W. Webb",       pos: "CB", value: 3.84, year: 2013 },
+    { name: "Justin Simmons",  pos: "FS", value: 3.85, year: 2016 },
+    { name: "Desmond Trufant", pos: "CB", value: 3.85, year: 2013 },
+    { name: "Austin Pettis",   pos: "WR", value: 3.88, year: 2011 },
+    { name: "Kevin King",      pos: "CB", value: 3.89, year: 2017 },
+    { name: "Kevin Johnson",   pos: "CB", value: 3.89, year: 2015 },
+    { name: "Damian Copeland", pos: "WR", value: 3.90, year: 2014 },
+  ],
+  bench: [
+    { name: "Stephen Paea",     pos: "DT", value: 49, year: 2011 },
+    { name: "Mitch Petrus",     pos: "OL", value: 45, year: 2010 },
+    { name: "Mike Kudla",       pos: "DL", value: 45, year: 2006 },
+    { name: "Netane Muti",      pos: "G",  value: 44, year: 2020 },
+    { name: "Dontari Poe",      pos: "DT", value: 44, year: 2012 },
+    { name: "Jeff Owens",       pos: "DT", value: 44, year: 2010 },
+    { name: "Brodrick Bunkley", pos: "DL", value: 44, year: 2006 },
+    { name: "Harrison Phillips",pos: "DT", value: 42, year: 2018 },
+    { name: "Russell Bodine",   pos: "C",  value: 42, year: 2014 },
+  ],
+};
+
+const HOF_LEGENDS = [
+
+  // ── RUNNING BACKS ──────────────────────────────────────────────────────────
+
+  {
+    name: "Barry Sanders",
+    pos: "RB",
+    year: 1989,
+    era: "Early Era*",
+    heightIn: 68,
+    weightLbs: 203,
+    forty: 4.41,
+    vertical: 41.5,
+    broad: 132,
+    bench: 21,
+    threeCone: null,
+    shuttle: null,
+    note: "One of the most explosive RBs ever — elite jump and speed numbers at 5'8\", 203 lbs."
+  },
+
+  {
+    name: "LaDainian Tomlinson",
+    pos: "RB",
+    year: 2001,
+    era: "2000s",
+    heightIn: 70,
+    weightLbs: 221,
+    forty: 4.41,
+    vertical: 40.5,
+    broad: null,
+    bench: null,
+    threeCone: null,
+    shuttle: null,
+    note: "Complete back — elite speed and explosion. Rushed for 28 TDs in a single season."
+  },
+
+  {
+    name: "Marshall Faulk",
+    pos: "RB",
+    year: 1994,
+    era: "1990s",
+    heightIn: 69,
+    weightLbs: 211,
+    forty: 4.28,
+    vertical: null,
+    broad: null,
+    bench: null,
+    threeCone: null,
+    shuttle: null,
+    note: "His 4.28 at 211 lbs in 1994 was one of the most shocking times a scout had ever seen for a back."
+  },
+
+  // ── WIDE RECEIVERS ─────────────────────────────────────────────────────────
+
+  {
+    name: "Calvin Johnson",
+    pos: "WR",
+    year: 2007,
+    era: "2000s",
+    heightIn: 77,
+    weightLbs: 239,
+    forty: 4.35,
+    vertical: 42.5,
+    broad: 139,
+    bench: null,
+    threeCone: 6.73,
+    shuttle: 4.11,
+    note: "Arguably the best combine ever by a WR — at 6'5\", 239 lbs he ran 4.35 and jumped 42.5\". He borrowed shoes to run."
+  },
+
+  {
+    name: "Jerry Rice",
+    pos: "WR",
+    year: 1985,
+    era: "Early Era*",
+    heightIn: 73,
+    weightLbs: 200,
+    forty: 4.58,
+    vertical: null,
+    broad: null,
+    bench: null,
+    threeCone: null,
+    shuttle: null,
+    note: "Official records reportedly show 4.58s (The Athletic). Went on to set virtually every WR record. Combine means nothing."
+  },
+
+  // ── QUARTERBACKS ───────────────────────────────────────────────────────────
+
+  {
+    name: "Michael Vick",
+    pos: "QB",
+    year: 2001,
+    era: "2000s",
+    heightIn: 73,
+    weightLbs: 215,
+    forty: 4.33,
+    vertical: null,
+    broad: null,
+    bench: null,
+    threeCone: null,
+    shuttle: null,
+    note: "The fastest QB ever measured at the combine — 4.33 at 215 lbs changed how teams thought about the position."
+  },
+
+  // ── DEFENSIVE BACKS ────────────────────────────────────────────────────────
+
+  {
+    name: "Deion Sanders",
+    pos: "DB",
+    year: 1989,
+    era: "Early Era*",
+    heightIn: 72,
+    weightLbs: 195,
+    forty: 4.27,
+    vertical: null,
+    broad: null,
+    bench: null,
+    threeCone: null,
+    shuttle: 3.96,
+    note: "Ran one 40, set an unofficial record, then walked out of the combine. 'Prime Time' didn't need to prove anything."
+  },
+
+  {
+    name: "Ed Reed",
+    pos: "DB",
+    year: 2002,
+    era: "2000s",
+    heightIn: 71,
+    weightLbs: 200,
+    forty: 4.57,
+    vertical: 33.0,
+    broad: null,
+    bench: 15,
+    threeCone: null,
+    shuttle: null,
+    note: "The greatest ball-hawk in NFL history. Elite instincts that no combine drill could measure."
+  },
+
+  // ── LINEBACKERS ────────────────────────────────────────────────────────────
+
+  {
+    name: "Lawrence Taylor",
+    pos: "LB",
+    year: 1981,
+    era: "Early Era*",
+    heightIn: 75,
+    weightLbs: 237,
+    forty: 4.53,
+    vertical: null,
+    broad: null,
+    bench: null,
+    threeCone: null,
+    shuttle: null,
+    note: "Changed the game at LB forever — 4.53 at 237 lbs in 1981 was otherworldly. No one had seen a DE-speed linebacker before."
+  },
+
+  // ── DEFENSIVE LINE ─────────────────────────────────────────────────────────
+
+  {
+    name: "Reggie White",
+    pos: "DL",
+    year: 1984,
+    era: "Early Era*",
+    heightIn: 76,
+    weightLbs: 285,
+    forty: 4.68,
+    vertical: null,
+    broad: null,
+    bench: null,
+    threeCone: null,
+    shuttle: null,
+    note: "The 'Minister of Defense' — 4.68 at 285 lbs. Combined elite speed with Hall of Fame-level power and technique."
+  },
+
+  {
+    name: "Warren Sapp",
+    pos: "DL",
+    year: 1995,
+    era: "1990s",
+    heightIn: 74,
+    weightLbs: 303,
+    forty: 4.69,
+    vertical: null,
+    broad: null,
+    bench: null,
+    threeCone: null,
+    shuttle: null,
+    note: "4.69 at 303 lbs — scouts at the combine couldn't believe what they were seeing. Fastest DT time ever recorded."
+  },
+
+  {
+    name: "Bruce Smith",
+    pos: "DL",
+    year: 1985,
+    era: "Early Era*",
+    heightIn: 76,
+    weightLbs: 273,
+    forty: 4.59,
+    vertical: null,
+    broad: null,
+    bench: null,
+    threeCone: null,
+    shuttle: null,
+    note: "The all-time sack leader — 4.59 at 273 lbs in 1985 was elite for any position. Dominated the edge for 19 seasons."
+  },
+
+  // ── OFFENSIVE LINE ─────────────────────────────────────────────────────────
+
+  {
+    name: "Jonathan Ogden",
+    pos: "OL",
+    year: 1996,
+    era: "1990s",
+    heightIn: 79,
+    weightLbs: 345,
+    forty: 5.29,
+    vertical: 27.0,
+    broad: null,
+    bench: 45,
+    threeCone: null,
+    shuttle: null,
+    note: "45 bench reps at 345 lbs. At 6'7\", he moved like a player 100 lbs lighter. The gold standard for offensive tackle."
+  },
+  {
+    name: "Quenton Nelson",
+    pos: "OL",
+    year: 2018,
+    era: "2010s",
+    heightIn: 77,
+    weightLbs: 329,
+    forty: null,
+    vertical: 26.5,
+    broad: 105,
+    bench: 35,
+    threeCone: null,
+    shuttle: null,
+    note: "2018 — did not run the 40 but 35 bench reps and surprising athleticism for a guard. Considered the best OL prospect in years."
+  },
+
+  // ── QUARTERBACKS ───────────────────────────────────────────────────────────
+
+  {
+    name: "Cam Newton",
+    pos: "QB",
+    year: 2011,
+    era: "2010s",
+    heightIn: 77,
+    weightLbs: 248,
+    forty: 4.59,
+    vertical: 35.0,
+    broad: 126,
+    bench: null,
+    threeCone: null,
+    shuttle: null,
+    note: "2011 — most physically imposing QB ever measured. 4.59 at 6'5\", 248 lbs with an elite broad jump."
+  },
+  {
+    name: "Josh Allen",
+    pos: "QB",
+    year: 2018,
+    era: "2010s",
+    heightIn: 77,
+    weightLbs: 237,
+    forty: 4.75,
+    vertical: 33.5,
+    broad: 119,
+    bench: null,
+    threeCone: null,
+    shuttle: null,
+    note: "2018 — elite size-speed combo for a QB. Became one of the most athletic and productive players at the position."
+  },
+
+  // ── RUNNING BACKS (All-Pro additions) ──────────────────────────────────────
+
+  {
+    name: "Saquon Barkley",
+    pos: "RB",
+    year: 2018,
+    era: "2010s",
+    heightIn: 71,
+    weightLbs: 233,
+    forty: 4.40,
+    vertical: 41.0,
+    broad: null,
+    bench: 29,
+    threeCone: null,
+    shuttle: null,
+    note: "2018 — 41\" vertical and 29 bench reps at 233 lbs. One of the most complete athletic profiles ever from an RB."
+  },
+  {
+    name: "Adrian Peterson",
+    pos: "RB",
+    year: 2007,
+    era: "2000s",
+    heightIn: 73,
+    weightLbs: 217,
+    forty: 4.41,
+    vertical: 38.5,
+    broad: 127,
+    bench: null,
+    threeCone: 7.09,
+    shuttle: 4.40,
+    note: "2007 — did not bench due to injury, but his speed and explosion numbers were elite. RAS of 9.64/10."
+  },
+
+  // ── WIDE RECEIVERS (All-Pro additions) ─────────────────────────────────────
+
+  {
+    name: "Julio Jones",
+    pos: "WR",
+    year: 2011,
+    era: "2010s",
+    heightIn: 75,
+    weightLbs: 220,
+    forty: 4.34,
+    vertical: 38.5,
+    broad: 135,
+    bench: 17,
+    threeCone: null,
+    shuttle: 4.25,
+    note: "2011 — ran 4.34 on a fractured foot. At 6'3\", 220 lbs with a 135\" broad jump, redefined what a big WR could do athletically."
+  },
+  {
+    name: "Odell Beckham Jr.",
+    pos: "WR",
+    year: 2014,
+    era: "2010s",
+    heightIn: 71,
+    weightLbs: 198,
+    forty: 4.43,
+    vertical: 38.5,
+    broad: 122,
+    bench: 7,
+    threeCone: 6.69,
+    shuttle: 3.94,
+    note: "2014 — elite explosion and agility scores. The 3.94 shuttle was one of the best ever by a WR. Low bench is normal for skill WRs."
+  },
+  {
+    name: "Davante Adams",
+    pos: "WR",
+    year: 2014,
+    era: "2010s",
+    heightIn: 72,
+    weightLbs: 212,
+    forty: 4.56,
+    vertical: 39.5,
+    broad: 123,
+    bench: 14,
+    threeCone: null,
+    shuttle: null,
+    note: "2014 — a 39.5\" vertical is exceptional. Became one of the most technically precise WRs in NFL history."
+  },
+  {
+    name: "Justin Jefferson",
+    pos: "WR",
+    year: 2020,
+    era: "2020s",
+    heightIn: 73,
+    weightLbs: 202,
+    forty: 4.43,
+    vertical: 37.5,
+    broad: 126,
+    bench: null,
+    threeCone: null,
+    shuttle: null,
+    note: "2020 — 4.43 and 37.5\" vertical at 6'1\" turned heads. Went on to break Jerry Rice's single-season receiving record."
+  },
+  {
+    name: "A.J. Green",
+    pos: "WR",
+    year: 2011,
+    era: "2010s",
+    heightIn: 76,
+    weightLbs: 211,
+    forty: 4.48,
+    vertical: 34.5,
+    broad: 126,
+    bench: null,
+    threeCone: null,
+    shuttle: null,
+    note: "2011 — elite size (6'4\") and speed combination. One of the most naturally gifted receivers of his generation."
+  },
+  {
+    name: "Cooper Kupp",
+    pos: "WR",
+    year: 2017,
+    era: "2010s",
+    heightIn: 73,
+    weightLbs: 208,
+    forty: 4.62,
+    vertical: 31.0,
+    broad: 116,
+    bench: null,
+    threeCone: null,
+    shuttle: null,
+    note: "2017 — ran a modest 4.62 and was overlooked athletically. Became a Super Bowl MVP and Offensive Player of the Year. Route running > combine."
+  },
+
+  // ── TIGHT ENDS (All-Pro additions) ─────────────────────────────────────────
+
+  {
+    name: "Travis Kelce",
+    pos: "TE",
+    year: 2013,
+    era: "2010s",
+    heightIn: 77,
+    weightLbs: 256,
+    forty: 4.61,
+    vertical: 35.0,
+    broad: 124,
+    bench: null,
+    threeCone: null,
+    shuttle: null,
+    note: "2013 — Kelce did not run drills at the official combine. His 4.61 and other measurements are from his Cincinnati pro day. Became the greatest TE of his era regardless."
+  },
+
+  // ── DEFENSIVE LINE (All-Pro additions) ─────────────────────────────────────
+
+  {
+    name: "Aaron Donald",
+    pos: "DL",
+    year: 2014,
+    era: "2010s",
+    heightIn: 73,
+    weightLbs: 285,
+    forty: 4.68,
+    vertical: 32.0,
+    broad: 116,
+    bench: 35,
+    threeCone: 7.11,
+    shuttle: null,
+    note: "2014 — 35 bench reps at 285 lbs and a 4.68 forty. Named the best combine performer among all DTs that year. The greatest interior DL ever."
+  },
+  {
+    name: "Myles Garrett",
+    pos: "DL",
+    year: 2017,
+    era: "2010s",
+    heightIn: 77,
+    weightLbs: 272,
+    forty: 4.64,
+    vertical: 41.0,
+    broad: 128,
+    bench: 33,
+    threeCone: null,
+    shuttle: null,
+    note: "2017 — at 6'5\", 272 lbs: 4.64 forty, 41\" vertical (best among all DL), 33 bench reps. One of the best edge rusher combine performances ever."
+  },
+
+  // ── LINEBACKERS (additions) ─────────────────────────────────────────────────
+
+  {
+    name: "Luke Kuechly",
+    pos: "LB", year: 2012, era: "2010s",
+    heightIn: 73, weightLbs: 242,
+    forty: 4.58, vertical: 38.0, broad: null, bench: 27,
+    threeCone: null, shuttle: null,
+    note: "2012 — 27 bench reps and a 38\" vertical at 242 lbs. The most instinctive LB of his generation — his combine matched his elite on-field production."
+  },
+  {
+    name: "Lavonte David",
+    pos: "LB", year: 2012, era: "2010s",
+    heightIn: 72, weightLbs: 233,
+    forty: 4.65, vertical: 36.5, broad: null, bench: 19,
+    threeCone: null, shuttle: null,
+    note: "2012 — solid athleticism for an undersized LB. Has gone on to be one of the most consistent and decorated LBs of the modern era."
+  },
+  {
+    name: "Dont'a Hightower",
+    pos: "LB", year: 2012, era: "2010s",
+    heightIn: 75, weightLbs: 265,
+    forty: 4.68, vertical: null, broad: null, bench: null,
+    threeCone: null, shuttle: null,
+    note: "2012 — 4.68 at 265 lbs for an elite run-stopping presence. Became a cornerstone of the Patriots dynasty and a key postseason performer."
+  },
+
+  // ── DEFENSIVE BACKS (additions) ─────────────────────────────────────────────
+
+  {
+    name: "Eric Berry",
+    pos: "DB", year: 2010, era: "2010s",
+    heightIn: 70, weightLbs: 213,
+    forty: 4.47, vertical: 41.5, broad: 120, bench: 19,
+    threeCone: null, shuttle: null,
+    note: "2010 — 41.5\" vertical and 4.47 speed at 213 lbs. One of the most complete safety prospects ever, combining elite athleticism with football intelligence."
+  },
+  {
+    name: "Jalen Ramsey",
+    pos: "DB", year: 2016, era: "2010s",
+    heightIn: 73, weightLbs: 209,
+    forty: 4.41, vertical: 41.5, broad: 135, bench: null,
+    threeCone: null, shuttle: null,
+    note: "2016 — 4.41 at 6'1\", 209 lbs with a 41.5\" vertical and 135\" broad jump. One of the best CB combine performances of the modern era."
+  },
+  {
+    name: "Earl Thomas",
+    pos: "DB", year: 2010, era: "2010s",
+    heightIn: 70, weightLbs: 208,
+    forty: 4.49, vertical: null, broad: null, bench: null,
+    threeCone: null, shuttle: null,
+    note: "2010 — elite instincts and range at safety. At 5'10\", 208 lbs his speed and football IQ made him one of the best safeties in NFL history."
+  },
+  {
+    name: "Richard Sherman",
+    pos: "DB", year: 2011, era: "2010s",
+    heightIn: 75, weightLbs: 195,
+    forty: 4.56, vertical: null, broad: null, bench: null,
+    threeCone: null, shuttle: null,
+    note: "2011 combine: ran 4.56 — scouts questioned his speed. Went 5th round, then became the most dominant CB of his era. Combine times tell only part of the story."
+  },
+
+  // ── OFFENSIVE LINE (additions) ──────────────────────────────────────────────
+
+  {
+    name: "Joe Thomas",
+    pos: "OL", year: 2007, era: "2000s",
+    heightIn: 79, weightLbs: 311,
+    forty: 4.79, vertical: null, broad: null, bench: 29,
+    threeCone: null, shuttle: null,
+    note: "2007 — 4.79 at 6'6\", 311 lbs. Went on to start 10,363 consecutive snaps — never missed a single play in 11 seasons. The most reliable OT in NFL history."
+  },
+  {
+    name: "Jason Kelce",
+    pos: "OL", year: 2011, era: "2010s",
+    heightIn: 74, weightLbs: 295,
+    forty: 4.89, vertical: 30.5, broad: 110, bench: null,
+    threeCone: 7.22, shuttle: 4.14,
+    note: "2011 — fastest 40 of any OL at the 2011 combine. His 4.14 shuttle showed elite agility for a center. Became one of the greatest to ever play the position."
+  },
+  {
+    name: "Trent Williams",
+    pos: "OL", year: 2010, era: "2010s",
+    heightIn: 77, weightLbs: 315,
+    forty: 4.88, vertical: 34.5, broad: 113, bench: 23,
+    threeCone: null, shuttle: null,
+    note: "2010 — 4.88 at 315 lbs with a 34.5\" vertical. Widely considered the best offensive tackle in the NFL for multiple seasons of his career."
+  },
+
+  // ── TIGHT ENDS (additions) ──────────────────────────────────────────────────
+
+  {
+    name: "George Kittle",
+    pos: "TE", year: 2017, era: "2010s",
+    heightIn: 75, weightLbs: 247,
+    forty: 4.52, vertical: null, broad: null, bench: null,
+    threeCone: null, shuttle: null,
+    note: "2017 — 4.52 at 247 lbs is elite for a TE. Went 5th round, then became one of the most explosive receiving TEs of his generation."
+  },
+  {
+    name: "Mark Andrews",
+    pos: "TE", year: 2018, era: "2010s",
+    heightIn: 76, weightLbs: 256,
+    forty: 4.67, vertical: 33.5, broad: 117, bench: null,
+    threeCone: null, shuttle: null,
+    note: "2018 — solid measurables for a big-bodied TE. Became one of the most reliable red zone weapons in the NFL under Lamar Jackson."
+  },
+
+  // ── NFL.COM LEADERBOARD NOTABLE PERFORMERS ──────────────────────────────────
+
+  {
+    name: "Byron Jones",
+    pos: "DB", year: 2015, era: "2010s",
+    heightIn: 73, weightLbs: 199,
+    forty: 4.42, vertical: 44.5, broad: 147, bench: 12,
+    threeCone: null, shuttle: 4.26,
+    note: "2015 — set the all-time broad jump record at 12'3\" (147\") and posted a 44.5\" vertical at 199 lbs. One of the most freakish combine performances ever recorded."
+  },
+  {
+    name: "Chris Johnson",
+    pos: "RB", year: 2008, era: "2000s",
+    heightIn: 71, weightLbs: 197,
+    forty: 4.24, vertical: 40.5, broad: 136, bench: 17,
+    threeCone: 6.57, shuttle: 3.93,
+    note: "2008 — ran 4.24 at 197 lbs, setting a record that stood as the #1 mark for 9 years. CJ2K went on to rush for 2,006 yards in 2009."
+  },
+  {
+    name: "Obi Melifonwu",
+    pos: "DB", year: 2017, era: "2010s",
+    heightIn: 75, weightLbs: 224,
+    forty: 4.40, vertical: 44.0, broad: 141, bench: null,
+    threeCone: 6.97, shuttle: 4.22,
+    note: "2017 — 44\" vertical AND 141\" broad jump (11'9\") at 6'3\", 224 lbs. One of the most freakish athletic specimens ever measured at safety."
+  },
+  {
+    name: "Stephen Paea",
+    pos: "DL", year: 2011, era: "2010s",
+    heightIn: 73, weightLbs: 311,
+    forty: 4.98, vertical: 30.5, broad: 107, bench: 49,
+    threeCone: 7.77, shuttle: 4.61,
+    note: "2011 — set the all-time bench press record with 49 reps of 225 lbs. His record has stood for over a decade."
+  },
+  {
+    name: "Brandin Cooks",
+    pos: "WR", year: 2014, era: "2010s",
+    heightIn: 69, weightLbs: 189,
+    forty: 4.33, vertical: 38.5, broad: 125, bench: null,
+    threeCone: 6.57, shuttle: 3.81,
+    note: "2014 — ran a 4.33 forty and posted a 3.81 shuttle, tying the all-time record. One of the fastest and most agile WRs ever measured at the combine."
+  },
+  {
+    name: "Eli Stowers",
+    pos: "TE", year: 2026, era: "2020s",
+    heightIn: 77, weightLbs: 254,
+    forty: null, vertical: 45.5, broad: null, bench: null,
+    threeCone: null, shuttle: null,
+    note: "2026 — set the all-time vertical jump record at 45.5\", breaking Chris Conley's 45.0\" mark from 2015. A new standard for athletic testing at the tight end position."
+  }
+
+];
+
+const ERA_DATA = {
+  "2000-2025": null, // null = use default COMBINE_DATA averages
+
+  "2000-2007": {
+    QB:  { forty: 4.86, vertical: 31.5, broad: 110, bench: 21, threeCone: 7.08, shuttle: 4.42 },
+    RB:  { forty: 4.58, vertical: 34.0, broad: 115, bench: 20, threeCone: 7.00, shuttle: 4.28 },
+    WR:  { forty: 4.55, vertical: 35.5, broad: 118, bench: 14, threeCone: 7.02, shuttle: 4.30 },
+    TE:  { forty: 4.78, vertical: 32.5, broad: 113, bench: 22, threeCone: 7.18, shuttle: 4.46 },
+    OL:  { forty: 5.35, vertical: 26.5, broad: 98,  bench: 24, threeCone: 7.88, shuttle: 4.85 },
+    DL:  { forty: 4.93, vertical: 29.5, broad: 106, bench: 27, threeCone: 7.48, shuttle: 4.70 },
+    LB:  { forty: 4.75, vertical: 32.5, broad: 111, bench: 24, threeCone: 7.24, shuttle: 4.46 },
+    DB:  { forty: 4.53, vertical: 34.5, broad: 116, bench: 16, threeCone: 6.94, shuttle: 4.24 },
+    ST:  { forty: 4.68, vertical: 30.5, broad: 108, bench: 18, threeCone: 7.26, shuttle: 4.44 }
+  },
+
+  "2008-2014": {
+    QB:  { forty: 4.84, vertical: 32.0, broad: 111, bench: 20, threeCone: 7.04, shuttle: 4.40 },
+    RB:  { forty: 4.56, vertical: 35.0, broad: 116, bench: 19, threeCone: 6.97, shuttle: 4.26 },
+    WR:  { forty: 4.53, vertical: 36.0, broad: 119, bench: 14, threeCone: 7.00, shuttle: 4.28 },
+    TE:  { forty: 4.76, vertical: 33.0, broad: 114, bench: 22, threeCone: 7.14, shuttle: 4.44 },
+    OL:  { forty: 5.31, vertical: 27.0, broad: 99,  bench: 25, threeCone: 7.82, shuttle: 4.82 },
+    DL:  { forty: 4.91, vertical: 30.0, broad: 107, bench: 27, threeCone: 7.42, shuttle: 4.67 },
+    LB:  { forty: 4.73, vertical: 33.0, broad: 112, bench: 24, threeCone: 7.20, shuttle: 4.43 },
+    DB:  { forty: 4.51, vertical: 35.0, broad: 117, bench: 16, threeCone: 6.90, shuttle: 4.21 },
+    ST:  { forty: 4.66, vertical: 31.0, broad: 109, bench: 18, threeCone: 7.22, shuttle: 4.42 }
+  },
+
+  "2015-2019": {
+    QB:  { forty: 4.82, vertical: 33.0, broad: 113, bench: 20, threeCone: 7.00, shuttle: 4.37 },
+    RB:  { forty: 4.54, vertical: 35.5, broad: 118, bench: 19, threeCone: 6.93, shuttle: 4.23 },
+    WR:  { forty: 4.51, vertical: 36.5, broad: 121, bench: 14, threeCone: 6.96, shuttle: 4.26 },
+    TE:  { forty: 4.74, vertical: 33.5, broad: 116, bench: 22, threeCone: 7.10, shuttle: 4.41 },
+    OL:  { forty: 5.28, vertical: 27.5, broad: 101, bench: 25, threeCone: 7.78, shuttle: 4.79 },
+    DL:  { forty: 4.88, vertical: 30.5, broad: 109, bench: 27, threeCone: 7.38, shuttle: 4.63 },
+    LB:  { forty: 4.71, vertical: 33.5, broad: 114, bench: 24, threeCone: 7.16, shuttle: 4.41 },
+    DB:  { forty: 4.49, vertical: 35.5, broad: 119, bench: 16, threeCone: 6.85, shuttle: 4.18 },
+    ST:  { forty: 4.64, vertical: 31.5, broad: 111, bench: 18, threeCone: 7.18, shuttle: 4.39 }
+  },
+
+  "2020-2025": {
+    QB:  { forty: 4.80, vertical: 33.5, broad: 114, bench: 19, threeCone: 6.98, shuttle: 4.35 },
+    RB:  { forty: 4.52, vertical: 36.0, broad: 119, bench: 18, threeCone: 6.90, shuttle: 4.21 },
+    WR:  { forty: 4.49, vertical: 37.0, broad: 123, bench: 13, threeCone: 6.93, shuttle: 4.24 },
+    TE:  { forty: 4.72, vertical: 34.0, broad: 117, bench: 21, threeCone: 7.07, shuttle: 4.39 },
+    OL:  { forty: 5.26, vertical: 28.0, broad: 102, bench: 25, threeCone: 7.74, shuttle: 4.77 },
+    DL:  { forty: 4.86, vertical: 31.0, broad: 110, bench: 26, threeCone: 7.34, shuttle: 4.61 },
+    LB:  { forty: 4.69, vertical: 34.0, broad: 115, bench: 23, threeCone: 7.12, shuttle: 4.39 },
+    DB:  { forty: 4.47, vertical: 36.0, broad: 121, bench: 15, threeCone: 6.82, shuttle: 4.16 },
+    ST:  { forty: 4.62, vertical: 32.0, broad: 112, bench: 17, threeCone: 7.14, shuttle: 4.37 }
+  }
+};
+
+const TRAINING_RECS = {
+  forty: {
+    title: "40-Yard Dash",
+    target_note: "First 10 yards determine most 40-yard dash times. Train explosive starts.",
+    drills: [
+      { name: "Resisted Sprint Starts",    desc: "Use a sled or resistance band for 10-yard acceleration work. 8 reps." },
+      { name: "A-Skip & B-Skip Mechanics", desc: "Daily sprint mechanics drills improve stride efficiency and posture." },
+      { name: "3-Point Stance Starts",     desc: "Practice NFL-style block starts. 10×10-yard bursts per session." },
+      { name: "Hill Sprints",              desc: "Short uphill sprints (30–40 yards) build posterior chain power. 3× per week." }
+    ]
+  },
+  vertical: {
+    title: "Vertical Jump",
+    target_note: "Hip drive and triple extension (ankle/knee/hip) are the keys to jumping higher.",
+    drills: [
+      { name: "Max Effort Box Jumps", desc: "Jump to maximum height box, step down, reset. 3 sets of 5 reps." },
+      { name: "Depth Drops",          desc: "Step off box, absorb landing, immediately jump. Trains reactive strength." },
+      { name: "Power Cleans",         desc: "Olympic lifting builds explosive hip extension. Start at 50% of bodyweight." },
+      { name: "Pogo Hops",            desc: "Rapid ankle-stiffness hops. 3×20 reps, minimal ground contact time." }
+    ]
+  },
+  broad: {
+    title: "Broad Jump",
+    target_note: "Lean forward at 45° and drive arms aggressively forward for maximum horizontal distance.",
+    drills: [
+      { name: "Standing Broad Jump Practice", desc: "Max effort attempts with full arm swing. 3×5 reps, full rest." },
+      { name: "Kettlebell Swings",            desc: "Hip hinge explosiveness carries directly to broad jump power. 4×15." },
+      { name: "Horizontal Plyometrics",       desc: "Bounding drills and single-leg hops for horizontal power production." },
+      { name: "Ankle Mobility Work",          desc: "Better dorsiflexion = better takeoff angle. 5 min daily." }
+    ]
+  },
+  bench: {
+    title: "Bench Press at 225 lbs",
+    target_note: "Build your total 1RM to ~300+ lbs first. Then practice 225 specifically for rep efficiency.",
+    drills: [
+      { name: "Touch-and-Go 225 Practice", desc: "Specific practice at 225 lbs for rep efficiency. 3×max weekly." },
+      { name: "Paused Bench Press",        desc: "2-second pause at chest builds absolute strength. 5×3 at 85% 1RM." },
+      { name: "Tricep Lockout Work",       desc: "Close-grip bench, weighted dips, and board presses for lockout strength." },
+      { name: "Speed Bench",               desc: "8×3 at 135 lbs with maximum bar speed. Trains fast-twitch muscle fibers." }
+    ]
+  },
+  threeCone: {
+    title: "3-Cone Drill",
+    target_note: "The backpedal-to-sprint transition is where most time is lost. Drill this pivot relentlessly.",
+    drills: [
+      { name: "3-Cone Pattern Walk-Through",    desc: "Daily pattern practice until the path is automatic. 15 min." },
+      { name: "Hip Mobility Circles",           desc: "Hip flexor and hip rotator flexibility directly improves your cut speed." },
+      { name: "Lateral Shuffle + Acceleration", desc: "5-yard shuffle then explode forward. Trains direction change." },
+      { name: "Single-Leg Balance & Reactivity",desc: "Stability work improves your plant foot when cutting at speed." }
+    ]
+  },
+  shuttle: {
+    title: "20-Yard Shuttle",
+    target_note: "Touch the line with your hand on each end — this is required. Practice this habit every time.",
+    drills: [
+      { name: "5-10-5 Pattern Drilling",   desc: "Full-speed shuttle runs with proper hand touches. 10 per session." },
+      { name: "Deceleration Training",     desc: "Practice stopping in 1–2 steps under control. Key for line touches." },
+      { name: "Lateral Deceleration Cuts", desc: "Cone drills focusing on hard stops into directional changes." },
+      { name: "Short Burst Acceleration",  desc: "5-yard sprints from standing. Trains the first-step explosion needed." }
+    ]
+  }
+};
+
+const STAT_LABELS = {
+  forty:     '40-Yard Dash',
+  threeCone: '3-Cone Drill',
+  shuttle:   '20-Yd Shuttle',
+  vertical:  'Vertical Jump',
+  broad:     'Broad Jump',
+  bench:     'Bench Press (225)'
+};
+
+const STAT_UNITS = {
+  forty:     's',
+  threeCone: 's',
+  shuttle:   's',
+  vertical:  '"',
+  broad:     '"',
+  bench:     ' reps'
+};
+
+const STAT_TOOLTIPS = {
+  forty:     'Time to sprint 40 yards from a standing start. Scouts use this to measure raw speed and explosiveness. Faster is better.',
+  threeCone: 'Player sprints 5 yds to cone, back 5 yds, then cuts figure-8 around cones. Measures change-of-direction quickness. Faster is better.',
+  shuttle:   '5-10-5 drill: sprint 5 yds right, 10 yds left, 5 yds back. Tests lateral burst and deceleration. Faster is better.',
+  vertical:  'Standing vertical leap measured from fingertip reach. Tests explosive lower-body power and hip drive. Higher is better.',
+  broad:     'Standing horizontal jump measured in total inches. Tests horizontal power and takeoff mechanics. Further is better.',
+  bench:     'Number of reps at exactly 225 lbs. Measures upper-body strength endurance. More reps is better.',
+  height:    'Measured in shoes at the NFL Combine. Height expectations vary significantly by position.',
+  weight:    'Measured in underwear at the NFL Combine. Ideal weight range varies by position.'
+};
+
+const LOWER_IS_BETTER = ['forty', 'threeCone', 'shuttle'];
+
+const POSITION_CARDS = [
+  { pos: 'QB', label: 'Quarterback',          emoji: '🏈' },
+  { pos: 'RB', label: 'Running Back',         emoji: '💨' },
+  { pos: 'WR', label: 'Wide Receiver',        emoji: '⚡' },
+  { pos: 'TE', label: 'Tight End',            emoji: '🔒' },
+  { pos: 'OL', label: 'Offensive Lineman',    emoji: '🛡️' },
+  { pos: 'DL', label: 'Defensive Lineman',    emoji: '💥' },
+  { pos: 'LB', label: 'Linebacker',           emoji: '🎯' },
+  { pos: 'DB', label: 'Defensive Back',       emoji: '🔐' },
+  { pos: 'ST', label: 'Special Teams',        emoji: '⭐' }
+];
+
+'use strict';
+
+// ---------- Percentile ----------
+function calcPercentile(value, avg, elite, lowerIsBetter = false) {
+  if (value === null || value === undefined || isNaN(value)) return null;
+
+  if (lowerIsBetter) {
+    const poor = avg + (avg - elite) * 2;
+    if (value <= elite) return Math.min(99, 95 + (elite - value) / (elite * 0.05) * 4);
+    if (value <= avg)   return 50 + ((avg - value) / (avg - elite)) * 45;
+    if (value <= poor)  return Math.max(1, 50 - ((value - avg) / (poor - avg)) * 45);
+    return 1;
+  } else {
+    const poor = avg - (elite - avg) * 2;
+    if (value >= elite) return Math.min(99, 95 + (value - elite) / (elite * 0.05) * 4);
+    if (value >= avg)   return 50 + ((value - avg) / (elite - avg)) * 45;
+    if (value >= poor)  return Math.max(1, 50 - ((avg - value) / (avg - poor)) * 45);
+    return 1;
+  }
+}
+
+// ---------- Composite grade ----------
+function calcCompositeGrade(percentiles, position) {
+  const weights = COMBINE_DATA[position].compositeWeights;
+  let totalWeight = 0;
+  let weightedSum = 0;
+
+  for (const [stat, pct] of Object.entries(percentiles)) {
+    if (pct !== null && pct !== undefined && weights[stat]) {
+      weightedSum += pct * weights[stat];
+      totalWeight += weights[stat];
+    }
+  }
+
+  if (totalWeight === 0) return null;
+  const score = weightedSum / totalWeight;
+
+  if (score >= 90) return { grade: 'A+', label: 'ELITE',         color: '#00c851', score };
+  if (score >= 80) return { grade: 'A',  label: 'GREAT',         color: '#00c851', score };
+  if (score >= 70) return { grade: 'B+', label: 'ABOVE AVERAGE', color: '#7db56a', score };
+  if (score >= 60) return { grade: 'B',  label: 'GOOD',          color: '#7db56a', score };
+  if (score >= 50) return { grade: 'C+', label: 'AVERAGE',       color: '#ffd700', score };
+  if (score >= 40) return { grade: 'C',  label: 'BELOW AVERAGE', color: '#ffd700', score };
+  if (score >= 30) return { grade: 'D',  label: 'DEVELOPING',    color: '#ff6b35', score };
+  return             { grade: 'F',  label: 'NEEDS WORK',     color: '#ff1744', score };
+}
+
+// ---------- 1RM Calc ----------
+function calcOneRepMax(weight, reps) {
+  if (reps === 1) return weight;
+  return Math.round(weight * (1 + reps / 30));
+}
+
+function calc225Reps(oneRepMax) {
+  if (oneRepMax <= 225) return 0;
+  return Math.max(1, Math.floor(30 * (oneRepMax / 225 - 1)));
+}
+
+// ---------- Percentile → letter grade ----------
+function percentileToGrade(pct) {
+  if (pct === null || pct === undefined) return '—';
+  if (pct >= 90) return 'A+';
+  if (pct >= 80) return 'A';
+  if (pct >= 70) return 'B+';
+  if (pct >= 60) return 'B';
+  if (pct >= 50) return 'C+';
+  if (pct >= 40) return 'C';
+  if (pct >= 30) return 'D';
+  return 'F';
+}
+
+function percentileToColor(pct) {
+  if (pct === null || pct === undefined) return '#9ab0cc';
+  if (pct >= 80) return '#00c851';
+  if (pct >= 60) return '#7db56a';
+  if (pct >= 40) return '#ffd700';
+  if (pct >= 30) return '#ff6b35';
+  return '#ff1744';
+}
+
+// ---------- Radar axis scores ----------
+function calcRadarScores(percentiles, heightTotal, weight, pos) {
+  const p = percentiles;
+
+  function avg(...keys) {
+    const vals = keys.map(k => p[k]).filter(v => v !== null && v !== undefined);
+    if (!vals.length) return null;
+    return vals.reduce((a, b) => a + b, 0) / vals.length;
+  }
+
+  const speed         = avg('forty', 'shuttle');
+  const power         = p.bench !== null && p.bench !== undefined ? p.bench : null;
+  const explosiveness = avg('vertical', 'broad');
+  const agility       = avg('threeCone', 'shuttle');
+
+  // Size: 50 at position avg, ±25 per deviation unit, capped 0–100
+  let sizeScore = null;
+  if (weight !== null && heightTotal !== null) {
+    const wDev = (weight - pos.avg.weightLbs) / (pos.avg.weightLbs * 0.05);
+    const hDev = (heightTotal - pos.avg.heightIn) / (pos.avg.heightIn * 0.02);
+    sizeScore = Math.max(0, Math.min(100, 50 - wDev * 10 - hDev * 8));
+  }
+
+  const subScores = [speed, explosiveness, agility].filter(v => v !== null);
+  const athleticism = subScores.length ? subScores.reduce((a, b) => a + b, 0) / subScores.length : null;
+
+  return { speed, power, explosiveness, agility, size: sizeScore, athleticism };
+}
+
+// ---------- Format stat value for display ----------
+function formatStat(stat, value) {
+  if (value === null || value === undefined) return '—';
+  if (stat === 'bench') return `${value} reps`;
+  if (['forty', 'threeCone', 'shuttle'].includes(stat)) return `${parseFloat(value).toFixed(2)}s`;
+  if (['vertical', 'broad'].includes(stat)) return `${value}"`;
+  return `${value}`;
+}
+
+// ---------- Size Profile Percentile (gentler scale for display only) ----------
+function calcSizePercentile(value, avg, elite) {
+  if (value === null || value === undefined || isNaN(value)) return null;
+  const range = Math.max(elite - avg, 3); // enforce at least 3-unit range
+  const effectiveElite = avg + range;
+  const poor = avg - range * 2;
+  if (value >= effectiveElite) return Math.min(97, 85 + (value - effectiveElite) / range * 6);
+  if (value >= avg)   return 50 + ((value - avg) / range) * 35;
+  if (value >= poor)  return Math.max(5, 50 - ((avg - value) / (avg - poor)) * 45);
+  return 5;
+}
+
+// ---------- Ordinal suffix ----------
+function ordinal(n) {
+  const s = ['th','st','nd','rd'];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+'use strict';
+
+let barChartInstance = null;
+let radarChartInstance = null;
+let gradeRingInstance = null;
+
+// ---------- Grade Ring (doughnut) ----------
+function renderGradeRing(canvasId, composite) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  if (gradeRingInstance) { gradeRingInstance.destroy(); gradeRingInstance = null; }
+
+  const score = composite ? composite.score : 0;
+  const color = composite ? composite.color : '#9ab0cc';
+
+  gradeRingInstance = new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      datasets: [{
+        data: [score, 100 - score],
+        backgroundColor: [color, '#1a2d4a'],
+        borderWidth: 0,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      cutout: '75%',
+      rotation: -90,
+      circumference: 180,
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } }
+    }
+  });
+}
+
+// ---------- Horizontal Bar Chart ----------
+function renderBarChart(canvasId, stats, position) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  if (barChartInstance) { barChartInstance.destroy(); barChartInstance = null; }
+
+  const pos = COMBINE_DATA[position];
+  const labels = [];
+  const values = [];
+  const colors = [];
+
+  for (const [stat, pct] of Object.entries(stats)) {
+    if (pct === null || pct === undefined) continue;
+    labels.push(STAT_LABELS[stat] || stat);
+    values.push(Math.round(pct));
+    colors.push(percentileToColor(pct));
+  }
+
+  if (!labels.length) return;
+
+  // Set canvas container height based on bar count
+  const containerH = Math.max(200, labels.length * 46 + 70);
+  if (canvas.parentElement) canvas.parentElement.style.height = containerH + 'px';
+
+  // Plugin to draw avg line and elite marker
+  const annotationPlugin = {
+    id: 'combineBenchmarks',
+    afterDraw(chart) {
+      const { ctx, scales: { x, y } } = chart;
+      const avgX   = x.getPixelForValue(50);
+      const eliteX = x.getPixelForValue(95);
+      const top    = chart.chartArea.top;
+      const bottom = chart.chartArea.bottom;
+
+      // Avg dashed line
+      ctx.save();
+      ctx.setLineDash([6, 4]);
+      ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(avgX, top);
+      ctx.lineTo(avgX, bottom);
+      ctx.stroke();
+
+      // Avg label
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.font = '10px Inter, system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('AVG', avgX, top - 4);
+
+      // Green downward triangle at elite position
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#00c851';
+      const triSize = 6;
+      ctx.beginPath();
+      ctx.moveTo(eliteX, top + triSize);
+      ctx.lineTo(eliteX - triSize / 2, top);
+      ctx.lineTo(eliteX + triSize / 2, top);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.font = '10px Inter, system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('ELITE', eliteX, top - 4);
+      ctx.restore();
+    }
+  };
+
+  barChartInstance = new Chart(canvas, {
+    type: 'bar',
+    plugins: [annotationPlugin],
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: colors,
+        borderRadius: 4,
+        borderSkipped: false,
+        barThickness: 22
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 20, right: 16, left: 8, bottom: 8 } },
+      scales: {
+        x: {
+          min: 0,
+          max: 100,
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          ticks: {
+            color: '#9ab0cc',
+            font: { family: 'Inter, system-ui, sans-serif', size: 11 },
+            callback: v => v + 'th'
+          }
+        },
+        y: {
+          grid: { display: false },
+          ticks: {
+            color: '#ffffff',
+            font: { family: 'Inter, system-ui, sans-serif', size: 12 }
+          }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ordinal(Math.round(ctx.parsed.x))} percentile`
+          },
+          bodyFont: { family: 'Inter, system-ui, sans-serif' }
+        }
+      }
+    }
+  });
+}
+
+// ---------- Radar Chart ----------
+function renderRadarChart(canvasId, radarScores, position) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  if (radarChartInstance) { radarChartInstance.destroy(); radarChartInstance = null; }
+
+  const AXES = ['Speed', 'Power', 'Explosiveness', 'Agility', 'Size', 'Athleticism'];
+  const KEYS = ['speed', 'power', 'explosiveness', 'agility', 'size', 'athleticism'];
+
+  // Only include axes that have data
+  const activeAxes = [];
+  const activeKeys = [];
+  AXES.forEach((label, i) => {
+    if (radarScores[KEYS[i]] !== null && radarScores[KEYS[i]] !== undefined) {
+      activeAxes.push(label);
+      activeKeys.push(KEYS[i]);
+    }
+  });
+
+  if (activeAxes.length < 3) return;
+
+  const userData  = activeKeys.map(k => Math.round(radarScores[k]));
+  const avgData   = activeKeys.map(() => 50);
+  const eliteData = activeKeys.map(() => 95);
+
+  radarChartInstance = new Chart(canvas, {
+    type: 'radar',
+    data: {
+      labels: activeAxes,
+      datasets: [
+        {
+          label: 'You',
+          data: userData,
+          backgroundColor: 'rgba(200,168,61,0.25)',
+          borderColor: '#c8a83d',
+          borderWidth: 2,
+          pointBackgroundColor: '#c8a83d',
+          pointRadius: 4
+        },
+        {
+          label: 'Position Average',
+          data: avgData,
+          backgroundColor: 'transparent',
+          borderColor: 'rgba(100,160,255,0.7)',
+          borderWidth: 1.5,
+          borderDash: [6, 4],
+          pointBackgroundColor: 'rgba(100,160,255,0.7)',
+          pointRadius: 3
+        },
+        {
+          label: 'Elite Benchmark',
+          data: eliteData,
+          backgroundColor: 'transparent',
+          borderColor: 'rgba(0,200,81,0.7)',
+          borderWidth: 1.5,
+          borderDash: [4, 3],
+          pointBackgroundColor: 'rgba(0,200,81,0.7)',
+          pointRadius: 3
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      scales: {
+        r: {
+          min: 0,
+          max: 100,
+          angleLines: { color: 'rgba(255,255,255,0.1)' },
+          grid: { color: 'rgba(255,255,255,0.1)' },
+          pointLabels: {
+            color: '#9ab0cc',
+            font: { family: 'Inter, system-ui, sans-serif', size: 12 }
+          },
+          ticks: {
+            display: false,
+            stepSize: 25
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'bottom',
+          labels: {
+            color: '#9ab0cc',
+            font: { family: 'Inter, system-ui, sans-serif', size: 12 },
+            padding: 20,
+            usePointStyle: true,
+            pointStyleWidth: 12
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.r}`
+          }
+        }
+      }
+    }
+  });
+}
+
+'use strict';
+
+async function downloadShareCard(playerName) {
+  const card = document.getElementById('share-card');
+  if (!card) return;
+  try {
+    const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: '#0a1628', logging: false });
+    const link = document.createElement('a');
+    link.download = `${playerName.toLowerCase().replace(/\s+/g, '-')}-combine-card.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } catch (err) {
+    console.error('Share card error:', err);
+    alert('Could not generate share card. Please try again.');
+  }
+}
+
+// ─── PDF helpers ─────────────────────────────────────────────────────────────
+
+function pdfNavy()   { return '#0a1628'; }
+function pdfCard()   { return '#132038'; }
+function pdfGold()   { return '#c8a83d'; }
+function pdfText()   { return '#ffffff'; }
+function pdfSecond() { return '#9ab0cc'; }
+function pdfBorder() { return '#1e3a5f'; }
+
+function gradeColor(composite) {
+  return composite ? composite.color : pdfGold();
+}
+
+function pdfSectionHeading(label) {
+  return `<div style="font-family:'Bebas Neue',Impact,sans-serif;font-size:18px;letter-spacing:0.06em;color:${pdfGold()};padding-bottom:8px;border-bottom:2px solid ${pdfBorder()};margin:20px 0 12px;">${label}</div>`;
+}
+
+function pdfStatRow(label, userVal, avgVal, eliteVal, pct, color) {
+  const pctRound = pct !== null ? Math.round(pct) : null;
+  const barW = pctRound !== null ? Math.max(2, pctRound) : 0;
+  return `
+    <div style="display:grid;grid-template-columns:160px 80px 70px 70px 90px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px;">
+      <span style="color:${pdfSecond()};">${label}</span>
+      <span style="font-family:'Bebas Neue',Impact,sans-serif;font-size:17px;color:${pdfGold()};">${userVal}</span>
+      <span style="color:${pdfSecond()};text-align:center;">${avgVal}</span>
+      <span style="color:${pdfSecond()};text-align:center;">${eliteVal}</span>
+      ${pctRound !== null ? `<span style="font-size:11px;font-weight:700;background:${color}22;color:${color};border:1px solid ${color}55;border-radius:100px;padding:2px 8px;text-align:center;">${ordinal(pctRound)} %ile</span>` : '<span></span>'}
+    </div>`;
+}
+
+function buildPdfPage(contentHtml, pageNum, totalPages, date) {
+  return `
+    <div style="width:595px;min-height:842px;background:${pdfNavy()};color:${pdfText()};font-family:'Inter',system-ui,sans-serif;font-size:13px;padding:32px;box-sizing:border-box;position:relative;display:flex;flex-direction:column;">
+      <div style="flex:1;">${contentHtml}</div>
+      <div style="border-top:1px solid ${pdfBorder()};padding-top:10px;margin-top:20px;display:flex;justify-content:space-between;font-size:10px;color:#4a6080;">
+        <span>NFL Combine Comparison Tool  |  Generated ${date}  |  For entertainment purposes only</span>
+        <span>Page ${pageNum} of ${totalPages}</span>
+      </div>
+    </div>`;
+}
+
+// ─── Page builders ────────────────────────────────────────────────────────────
+
+function buildPage1(state) {
+  const pos = COMBINE_DATA[state.position];
+  const { name, position, composite, percentiles, heightFt, heightIn, weight, age } = state;
+  const match = state.athleteMatch;
+  const entered = ['forty','threeCone','shuttle','vertical','broad','bench'].filter(s => state[s] !== null);
+
+  const hwParts = [];
+  if (age)      hwParts.push(`Age ${age}`);
+  if (heightFt) hwParts.push(`${heightFt}'${heightIn || 0}"`);
+  if (weight)   hwParts.push(`${weight} lbs`);
+
+  const statsHtml = entered.map(stat => {
+    const pct   = percentiles[stat];
+    const color = pct !== null ? percentileToColor(pct) : pdfSecond();
+    const pctRound = pct !== null ? Math.round(pct) : null;
+    return `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+        <span style="color:${pdfSecond()};font-size:12px;width:140px;">${STAT_LABELS[stat]}</span>
+        <span style="font-family:'Bebas Neue',Impact,sans-serif;font-size:20px;color:${pdfGold()};flex:1;text-align:center;">${formatStat(stat, state[stat])}</span>
+        ${pctRound !== null ? `<span style="font-size:11px;background:${color}22;color:${color};border:1px solid ${color}55;border-radius:100px;padding:2px 9px;">${ordinal(pctRound)} %ile</span>` : ''}
+      </div>`;
+  }).join('');
+
+  const matchHtml = match ? `
+    <div style="margin-top:16px;padding:12px 16px;background:rgba(200,168,61,0.06);border:1px solid rgba(200,168,61,0.25);border-radius:8px;">
+      <div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:${pdfSecond()};margin-bottom:4px;">⚡ YOUR ATHLETE MATCH</div>
+      <div style="font-family:'Bebas Neue',Impact,sans-serif;font-size:24px;color:${pdfGold()};">${match.name.toUpperCase()}</div>
+      <div style="font-size:11px;color:${pdfSecond()};">${match.pos} · ${match.era}${match.year ? ' · ' + match.year : ''}</div>
+    </div>` : '';
+
+  return `
+    <div style="text-align:center;padding-bottom:20px;border-bottom:2px solid ${pdfBorder()};">
+      <div style="font-family:'Bebas Neue',Impact,sans-serif;font-size:11px;letter-spacing:0.2em;color:${pdfGold()};margin-bottom:12px;">NFL DRAFT SCOUTING REPORT</div>
+      <div style="display:inline-block;background:${pdfGold()};color:${pdfNavy()};font-family:'Bebas Neue',Impact,sans-serif;font-size:11px;letter-spacing:0.1em;padding:3px 14px;border-radius:100px;margin-bottom:10px;">${pos.label.toUpperCase()}</div>
+      <div style="font-family:'Bebas Neue',Impact,sans-serif;font-size:48px;color:${pdfText()};line-height:1;">${name.toUpperCase()}</div>
+      <div style="font-size:12px;color:${pdfSecond()};margin-top:6px;">${hwParts.join('  ·  ')}</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 140px;gap:24px;margin-top:20px;">
+      <div>
+        ${pdfSectionHeading('COMBINE SCORES')}
+        ${statsHtml || `<p style="color:${pdfSecond()};font-style:italic;">No stats entered.</p>`}
+        ${matchHtml}
+      </div>
+      <div style="text-align:center;">
+        <div style="border:2px solid ${gradeColor(composite)};border-radius:10px;padding:16px 8px;margin-bottom:12px;">
+          <div style="font-family:'Bebas Neue',Impact,sans-serif;font-size:64px;color:${gradeColor(composite)};line-height:1;">${composite ? composite.grade : '—'}</div>
+          <div style="font-family:'Bebas Neue',Impact,sans-serif;font-size:13px;letter-spacing:0.08em;color:${gradeColor(composite)};">${composite ? composite.label : 'OVERALL'}</div>
+        </div>
+        <div style="font-size:11px;color:${pdfSecond()};">Overall Grade</div>
+      </div>
+    </div>`;
+}
+
+function buildPage2(state) {
+  const pos = COMBINE_DATA[state.position];
+  const { percentiles } = state;
+
+  function row(stat) {
+    if (state[stat] === null) return '';
+    const pct = percentiles[stat];
+    const color = pct !== null ? percentileToColor(pct) : pdfSecond();
+    return pdfStatRow(
+      STAT_LABELS[stat],
+      formatStat(stat, state[stat]),
+      formatStat(stat, pos.avg[stat]),
+      formatStat(stat, pos.elite[stat]),
+      pct, color
+    );
+  }
+
+  function colHeader() {
+    return `<div style="display:grid;grid-template-columns:160px 80px 70px 70px 90px;gap:8px;padding:5px 0;border-bottom:1px solid ${pdfBorder()};margin-bottom:4px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:${pdfSecond()};">
+      <span>Stat</span><span>Your Value</span><span style="text-align:center;">Avg</span><span style="text-align:center;">Elite</span><span style="text-align:center;">Percentile</span>
+    </div>`;
+  }
+
+  const sizeRows = [];
+  if (state.heightTotal !== null) sizeRows.push(`<div style="display:flex;gap:16px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px;"><span style="color:${pdfSecond()};width:160px;">Height</span><span style="font-family:'Bebas Neue',Impact,sans-serif;font-size:17px;color:${pdfGold()};">${state.heightFt}'${state.heightIn || 0}"</span><span style="color:${pdfSecond()};margin-left:auto;">Pos avg: ${fmtInchHeight(pos.avg.heightIn)}</span></div>`);
+  if (state.weight !== null) sizeRows.push(`<div style="display:flex;gap:16px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px;"><span style="color:${pdfSecond()};width:160px;">Weight</span><span style="font-family:'Bebas Neue',Impact,sans-serif;font-size:17px;color:${pdfGold()};">${state.weight} lbs</span><span style="color:${pdfSecond()};margin-left:auto;">Pos avg: ${pos.avg.weightLbs} lbs</span></div>`);
+  if (state.armLength !== null) sizeRows.push(`<div style="display:flex;gap:16px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px;"><span style="color:${pdfSecond()};width:160px;">Arm Length</span><span style="font-family:'Bebas Neue',Impact,sans-serif;font-size:17px;color:${pdfGold()};">${state.armLength}"</span><span style="color:${pdfSecond()};margin-left:auto;">Pos avg: ${pos.avg.armLengthIn}"</span></div>`);
+  if (state.handSize !== null) sizeRows.push(`<div style="display:flex;gap:16px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px;"><span style="color:${pdfSecond()};width:160px;">Hand Size</span><span style="font-family:'Bebas Neue',Impact,sans-serif;font-size:17px;color:${pdfGold()};">${state.handSize}"</span><span style="color:${pdfSecond()};margin-left:auto;">Pos avg: ${pos.avg.handSizeIn}"</span></div>`);
+
+  return `
+    ${pdfSectionHeading('SPEED & AGILITY')}
+    ${colHeader()}
+    ${['forty','threeCone','shuttle'].map(row).join('')}
+
+    ${pdfSectionHeading('EXPLOSIVENESS')}
+    ${colHeader()}
+    ${['vertical','broad'].map(row).join('')}
+
+    ${pdfSectionHeading('STRENGTH')}
+    ${colHeader()}
+    ${row('bench')}
+
+    ${pdfSectionHeading('SIZE PROFILE')}
+    ${sizeRows.length ? sizeRows.join('') : `<p style="color:${pdfSecond()};font-style:italic;">No size measurements entered.</p>`}
+    <p style="font-size:10px;color:#4a6080;font-style:italic;margin-top:8px;">Height/weight shown for comparison only. Arm & hand size are informational and not weighted in grade.</p>`;
+}
+
+function buildPage3(state) {
+  const pos = COMBINE_DATA[state.position];
+  const entered = ['forty','threeCone','shuttle','vertical','broad','bench'].filter(s => state[s] !== null);
+
+  const avgRows = entered.map(stat => {
+    const userVal = state[stat];
+    const avgVal  = pos.avg[stat];
+    const isLower = LOWER_IS_BETTER.includes(stat);
+    const beats   = isLower ? userVal < avgVal : userVal > avgVal;
+    const rawDiff = Math.abs(userVal - avgVal);
+    let diffStr;
+    if (stat === 'bench')                         diffStr = beats ? `+${Math.round(rawDiff)} reps` : `-${Math.round(rawDiff)} reps`;
+    else if (stat === 'vertical' || stat === 'broad') diffStr = beats ? `+${rawDiff.toFixed(1)}"` : `-${rawDiff.toFixed(1)}"`;
+    else                                          diffStr = isLower ? (beats ? `${rawDiff.toFixed(2)}s faster` : `${rawDiff.toFixed(2)}s slower`) : (beats ? `+${rawDiff.toFixed(2)}` : `-${rawDiff.toFixed(2)}`);
+    const color = beats ? '#00c851' : '#ff1744';
+    return `
+      <div style="display:grid;grid-template-columns:150px 80px 80px 1fr;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px;">
+        <span style="color:${pdfSecond()};">${STAT_LABELS[stat]}</span>
+        <span style="font-family:'Bebas Neue',Impact,sans-serif;font-size:17px;color:${pdfGold()};">${formatStat(stat, userVal)}</span>
+        <span style="color:${pdfSecond()};">${formatStat(stat, avgVal)}</span>
+        <span style="color:${color};font-weight:600;">${beats ? '✅' : '❌'} ${diffStr}</span>
+      </div>`;
+  }).join('');
+
+  const beatCount = entered.filter(stat => {
+    const isLower = LOWER_IS_BETTER.includes(stat);
+    return isLower ? state[stat] < pos.avg[stat] : state[stat] > pos.avg[stat];
+  }).length;
+
+  // HOF legend comparisons (top 2)
+  const samePos = HOF_LEGENDS.filter(l => l.pos === state.position);
+  const legends = samePos.length >= 2 ? samePos.slice(0, 2) : [...samePos, ...HOF_LEGENDS.filter(l => l.pos !== state.position)].slice(0, 2);
+
+  const legendHtml = legends.map(legend => {
+    const deltas = ['forty','threeCone','shuttle','vertical','broad','bench']
+      .filter(s => state[s] !== null && legend[s] !== null)
+      .slice(0, 3)
+      .map(stat => {
+        const isLower = LOWER_IS_BETTER.includes(stat);
+        const diff = Math.abs(state[stat] - legend[stat]);
+        const beats = isLower ? state[stat] < legend[stat] : state[stat] > legend[stat];
+        return `<div style="font-size:11px;padding:3px 0;color:${pdfSecond()};">${STAT_LABELS[stat]}: <strong style="color:${pdfText()};">${formatStat(stat, state[stat])}</strong> vs ${legend.name.split(' ').pop()} ${formatStat(stat, legend[stat])} — <span style="color:${beats ? '#00c851' : '#ff1744'}">${beats ? (isLower ? diff.toFixed(2)+'s faster' : '+'+diff.toFixed(2)+' better') : (isLower ? diff.toFixed(2)+'s slower' : diff.toFixed(2)+' behind')}</span></div>`;
+      }).join('');
+    return `
+      <div style="background:rgba(255,255,255,0.03);border:1px solid ${pdfBorder()};border-radius:8px;padding:12px;margin-bottom:10px;">
+        <div style="font-family:'Bebas Neue',Impact,sans-serif;font-size:17px;color:${pdfText()};margin-bottom:2px;">${legend.name}</div>
+        <div style="font-size:11px;color:${pdfSecond()};margin-bottom:8px;">${legend.pos} · ${legend.era}</div>
+        ${deltas || `<div style="font-size:11px;color:${pdfSecond()};font-style:italic;">No overlapping stats to compare.</div>`}
+        <div style="font-size:11px;color:#4a6080;font-style:italic;margin-top:8px;">${legend.note}</div>
+      </div>`;
+  }).join('');
+
+  return `
+    ${pdfSectionHeading('YOU VS. THE AVERAGE COMBINE ATHLETE')}
+    <div style="display:grid;grid-template-columns:150px 80px 80px 1fr;gap:8px;padding:5px 0;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:${pdfSecond()};">
+      <span>Stat</span><span>You</span><span>Pos Avg</span><span>Difference</span>
+    </div>
+    ${avgRows || `<p style="color:${pdfSecond()};font-style:italic;">No stats entered.</p>`}
+    <div style="padding:12px 0;font-size:13px;color:${pdfSecond()};">You beat the position average in <strong style="color:${pdfText()};">${beatCount}</strong> out of <strong style="color:${pdfText()};">${entered.length}</strong> measured categories.</div>
+
+    ${pdfSectionHeading('HOW YOU COMPARE TO NOTABLE & ALL-PRO PERFORMERS')}
+    ${legendHtml || `<p style="color:${pdfSecond()};font-style:italic;">No same-position legends available.</p>`}`;
+}
+
+function buildPage4(state) {
+  const pcts = state.percentiles;
+  const entered = Object.entries(pcts).filter(([, v]) => v !== null);
+  const sorted  = [...entered].sort((a, b) => a[1] - b[1]);
+  const weakest = sorted.slice(0, 2);
+  const pos = COMBINE_DATA[state.position];
+
+  const cardHtml = weakest.map(([stat, pct]) => {
+    const rec = TRAINING_RECS[stat];
+    if (!rec) return '';
+    const elite = pos.elite[stat];
+    const userVal = state[stat];
+    const isLower = LOWER_IS_BETTER.includes(stat);
+    const diff = isLower
+      ? (userVal - elite).toFixed(2) + 's faster needed'
+      : (elite - userVal).toFixed(1) + `${STAT_UNITS[stat] || ''} needed`;
+    const pctRound = Math.round(pct);
+    const color = percentileToColor(pct);
+    const barFill = Math.max(2, Math.min(100, pctRound));
+
+    const drillsHtml = rec.drills.slice(0, 3).map(d => `
+      <div style="margin-bottom:10px;">
+        <div style="font-weight:700;font-size:13px;margin-bottom:2px;">${d.name}</div>
+        <div style="font-size:12px;color:${pdfSecond()};line-height:1.5;">${d.desc}</div>
+      </div>`).join('');
+
+    return `
+      <div style="background:rgba(255,255,255,0.03);border:1px solid ${pdfBorder()};border-radius:8px;padding:16px;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="font-family:'Bebas Neue',Impact,sans-serif;font-size:20px;letter-spacing:0.04em;">${rec.title}</div>
+          <div style="font-family:'Bebas Neue',Impact,sans-serif;font-size:16px;color:${color};">${ordinal(pctRound)} percentile</div>
+        </div>
+        <div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin-bottom:10px;">
+          <div style="height:100%;width:${barFill}%;background:${color};border-radius:3px;"></div>
+        </div>
+        <div style="font-size:12px;color:${pdfSecond()};margin-bottom:12px;line-height:1.5;">
+          You need to improve by <strong style="color:${pdfText()};">${diff}</strong> to reach elite level for ${pos.label}s.
+        </div>
+        ${drillsHtml}
+        <div style="background:rgba(200,168,61,0.08);border:1px solid rgba(200,168,61,0.25);border-radius:6px;padding:10px 12px;font-size:12px;color:${pdfSecond()};line-height:1.5;margin-top:10px;">
+          <strong style="color:${pdfGold()};">PRO TIP:</strong> ${rec.target_note}
+        </div>
+      </div>`;
+  }).join('');
+
+  return `
+    ${pdfSectionHeading('YOUR TRAINING ROADMAP')}
+    ${cardHtml || `<p style="color:${pdfSecond()};font-style:italic;">Enter stats to generate your personalized training plan.</p>`}`;
+}
+
+// ─── Main PDF export ──────────────────────────────────────────────────────────
+
+async function downloadPDF(playerName) {
+  const { jsPDF } = window.jspdf;
+  if (!jsPDF) { alert('PDF library not loaded. Please refresh and try again.'); return; }
+
+  // Access global state from app.js
+  const appState = window._appState || state;
+  const date = new Date().toLocaleDateString();
+  const totalPages = 4;
+
+  const pageBuilders = [
+    () => buildPage1(appState),
+    () => buildPage2(appState),
+    () => buildPage3(appState),
+    () => buildPage4(appState)
+  ];
+
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: [595, 842] });
+  let firstPage = true;
+
+  // Temporary container for rendering pages
+  const container = document.createElement('div');
+  container.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:-1;';
+  document.body.appendChild(container);
+
+  try {
+    for (let i = 0; i < pageBuilders.length; i++) {
+      const pageHtml = buildPdfPage(pageBuilders[i](), i + 1, totalPages, date);
+      container.innerHTML = pageHtml;
+      const el = container.firstElementChild;
+
+      const canvas = await html2canvas(el, {
+        scale: 1.5,
+        useCORS: true,
+        backgroundColor: '#0a1628',
+        logging: false,
+        width: 595,
+        windowWidth: 595
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      if (!firstPage) pdf.addPage();
+      firstPage = false;
+      pdf.addImage(imgData, 'PNG', 0, 0, 595, 842);
+    }
+  } finally {
+    document.body.removeChild(container);
+  }
+
+  pdf.save(`${playerName.toLowerCase().replace(/\s+/g, '-')}-combine-report.pdf`);
+}
+
+'use strict';
+
+// ---------- App State ----------
+const state = {
+  position: null,
+  name: '',
+  age: null,
+  heightFt: 5,
+  heightIn: 0,
+  heightTotal: null,
+  weight: null,
+  armLength: null,
+  handSize: null,
+  forty: null,
+  threeCone: null,
+  shuttle: null,
+  vertical: null,
+  broad: null,
+  bench: null,
+  percentiles: {},
+  composite: null,
+  radar: {},
+  athleteMatch: null,
+  era: '2000-2025'
+};
+
+// ---------- Screen Navigation ----------
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+    s.style.display = 'none'; // force hide regardless of ID-level CSS specificity
+  });
+  const target = document.getElementById(id);
+  if (target) {
+    target.style.display = ''; // remove inline override, let CSS (+ active class) control display
+    target.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+// ---------- Build Position Grid ----------
+function buildPositionGrid() {
+  const grid = document.getElementById('position-grid');
+  if (!grid) return;
+  grid.innerHTML = POSITION_CARDS.map(({ pos, label, emoji }) => `
+    <button class="position-card" data-position="${pos}" aria-label="${label}">
+      <span class="pos-emoji">${emoji}</span>
+      <span class="pos-abbr">${pos}</span>
+      <span class="pos-name">${label}</span>
+    </button>
+  `).join('');
+
+  grid.querySelectorAll('.position-card').forEach(card => {
+    card.addEventListener('click', () => {
+      grid.querySelectorAll('.position-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      state.position = card.dataset.position;
+      setTimeout(() => showScreen('screen-form'), 180);
+    });
+  });
+}
+
+// ---------- Accordion ----------
+function initAccordions() {
+  document.querySelectorAll('.accordion-header').forEach(header => {
+    header.addEventListener('click', () => {
+      const item = header.closest('.accordion-item');
+      const isOpen = item.classList.contains('open');
+      // Close all
+      document.querySelectorAll('.accordion-item').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+  // Open first by default
+  const first = document.querySelector('.accordion-item');
+  if (first) first.classList.add('open');
+}
+
+// ---------- 1RM Calculator ----------
+function initRMCalc() {
+  const toggle = document.getElementById('rm-toggle');
+  const panel  = document.getElementById('rm-panel');
+  const btn    = document.getElementById('btn-calc-rm');
+  const apply  = document.getElementById('btn-apply-rm');
+  const result = document.getElementById('rm-result');
+
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      const open = panel.classList.toggle('open');
+      toggle.querySelector('.rm-arrow').textContent = open ? '▲' : '▼';
+    });
+  }
+
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const w = parseFloat(document.getElementById('rm-weight').value);
+      const r = parseInt(document.getElementById('rm-reps-input').value);
+      if (isNaN(w) || isNaN(r) || w <= 0 || r <= 0) {
+        result.textContent = 'Please enter valid weight and reps.';
+        result.style.color = '#ff6b35';
+        return;
+      }
+      const oneRM = calcOneRepMax(w, r);
+      const repsAt225 = calc225Reps(oneRM);
+      result.innerHTML = `Estimated 1RM: <strong>${oneRM} lbs</strong> → ~<strong>${repsAt225} reps</strong> at 225 lbs`;
+      result.style.color = '#c8a83d';
+      if (apply) {
+        apply.dataset.reps = repsAt225;
+        apply.style.display = 'inline-flex';
+      }
+      if (r > 30) {
+        result.innerHTML += '<br><span style="color:#ff6b35;font-size:12px;">⚠ Epley formula is less accurate above 30 reps</span>';
+      }
+    });
+  }
+
+  if (apply) {
+    apply.addEventListener('click', () => {
+      const benchInput = document.getElementById('input-bench');
+      if (benchInput) {
+        benchInput.value = apply.dataset.reps;
+        benchInput.dispatchEvent(new Event('input'));
+      }
+    });
+  }
+}
+
+// ---------- Inline Validation ----------
+const VALIDATORS = {
+  'input-forty':     { min: 4.0,  max: 6.5,  msg: 'Enter 4.0 – 6.5 seconds'  },
+  'input-threecone': { min: 6.0,  max: 9.0,  msg: 'Enter 6.0 – 9.0 seconds'  },
+  'input-shuttle':   { min: 3.7,  max: 5.5,  msg: 'Enter 3.7 – 5.5 seconds'  },
+  'input-vertical':  { min: 20,   max: 50,   msg: 'Enter 20 – 50 inches'      },
+  'input-broad':     { min: 70,   max: 150,  msg: 'Enter 70 – 150 inches'     },
+  'input-bench':     { min: 1,    max: 55,   msg: 'Enter 1 – 55 reps'         },
+  'input-weight':    { min: 130,  max: 400,  msg: 'Enter 130 – 400 lbs'       },
+  'input-age':       { min: 14,   max: 45,   msg: 'Enter age 14 – 45'         }
+};
+
+function initValidation() {
+  for (const [id, rule] of Object.entries(VALIDATORS)) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    el.addEventListener('blur', () => validateField(el, rule));
+    el.addEventListener('input', () => clearError(el));
+  }
+}
+
+function validateField(el, rule) {
+  const val = parseFloat(el.value);
+  if (el.value === '' || isNaN(val)) return true; // optional
+  if (val < rule.min || val > rule.max) {
+    showError(el, rule.msg);
+    return false;
+  }
+  clearError(el);
+  return true;
+}
+
+function showError(el, msg) {
+  clearError(el);
+  el.classList.add('invalid');
+  const err = document.createElement('span');
+  err.className = 'field-error';
+  err.textContent = msg;
+  el.parentNode.insertBefore(err, el.nextSibling);
+}
+
+function clearError(el) {
+  el.classList.remove('invalid');
+  const next = el.nextElementSibling;
+  if (next && next.classList.contains('field-error')) next.remove();
+}
+
+// ---------- Generate Button Enable ----------
+function initGenerateBtn() {
+  const nameInput = document.getElementById('input-name');
+  const btn       = document.getElementById('btn-generate');
+  if (!nameInput || !btn) return;
+  nameInput.addEventListener('input', () => {
+    btn.disabled = nameInput.value.trim().length === 0;
+  });
+}
+
+// ---------- Read Form Values ----------
+function readFormValues() {
+  const get = id => {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+  };
+  const num = id => {
+    const v = parseFloat(get(id));
+    return isNaN(v) ? null : v;
+  };
+  const int = id => {
+    const v = parseInt(get(id));
+    return isNaN(v) ? null : v;
+  };
+
+  const heightFt = int('height-ft') ?? 5;
+  const heightInRaw = int('height-in');
+  const heightIn = (heightInRaw === null) ? 0 : heightInRaw;
+
+  return {
+    name:       get('input-name'),
+    age:        num('input-age'),
+    heightFt,
+    heightIn,
+    heightTotal: heightFt * 12 + heightIn,
+    weight:     num('input-weight'),
+    armLength:  num('input-arm'),
+    handSize:   num('input-hand'),
+    forty:      num('input-forty'),
+    threeCone:  num('input-threecone'),
+    shuttle:    num('input-shuttle'),
+    vertical:   num('input-vertical'),
+    broad:      num('input-broad'),
+    bench:      num('input-bench')
+  };
+}
+
+// ---------- Generate Results ----------
+function generateResults() {
+  const data = readFormValues();
+  if (!data.name) return;
+
+  Object.assign(state, data);
+  const pos = COMBINE_DATA[state.position];
+
+  // Percentiles
+  const pct = {};
+  if (state.forty    !== null) pct.forty     = calcPercentile(state.forty,    pos.avg.forty,     pos.elite.forty,     true);
+  if (state.threeCone !== null) pct.threeCone = calcPercentile(state.threeCone, pos.avg.threeCone, pos.elite.threeCone, true);
+  if (state.shuttle  !== null) pct.shuttle   = calcPercentile(state.shuttle,  pos.avg.shuttle,   pos.elite.shuttle,   true);
+  if (state.vertical !== null) pct.vertical  = calcPercentile(state.vertical, pos.avg.vertical,  pos.elite.vertical,  false);
+  if (state.broad    !== null) pct.broad     = calcPercentile(state.broad,    pos.avg.broad,     pos.elite.broad,     false);
+  if (state.bench    !== null) pct.bench     = calcPercentile(state.bench,    pos.avg.bench,     pos.elite.bench,     false);
+
+  state.percentiles = pct;
+  state.composite   = calcCompositeGrade(pct, state.position);
+  state.radar       = calcRadarScores(pct, state.heightTotal, state.weight, pos);
+
+  renderPlayerHeader();
+  renderAthleteMatch();
+  renderSizeProfile();
+  renderScoutingCard();
+  renderBarChart('bar-chart-canvas', pct, state.position);
+  renderAvgComparison();
+  renderRadarSection();
+  renderHOFComparisons();
+  renderLeaderboard();
+  renderTrainingRecs();
+  initPlayerCompare();
+  renderShareCard();
+  checkEasterEggs();
+
+  showScreen('screen-results');
+  setTimeout(animateAllCounters, 300);
+  setTimeout(() => renderGradeRing('grade-ring-canvas', state.composite), 400);
+}
+
+// ---------- Render Player Header ----------
+function renderPlayerHeader() {
+  const pos = COMBINE_DATA[state.position];
+  const { name, age, heightFt, heightIn, weight, composite } = state;
+
+  setText('res-name', name.toUpperCase());
+  setText('res-position-badge', pos.label.toUpperCase());
+
+  const hwParts = [];
+  if (age)       hwParts.push(`Age ${age}`);
+  if (heightFt)  hwParts.push(`${heightFt}'${heightIn || 0}"`);
+  if (weight)    hwParts.push(`${weight} lbs`);
+  setText('res-age-hw', hwParts.join('  ·  ') || '');
+
+  if (composite) {
+    const gradeEl = document.getElementById('res-grade-letter');
+    const labelEl = document.getElementById('res-grade-label');
+    if (gradeEl) { gradeEl.textContent = composite.grade; gradeEl.style.color = composite.color; }
+    if (labelEl) { labelEl.textContent = composite.label; labelEl.style.color = composite.color; }
+  } else {
+    setText('res-grade-letter', '—');
+    setText('res-grade-label', 'ENTER MORE STATS');
+  }
+}
+
+// ---------- Render Scouting Card ----------
+function renderScoutingCard() {
+  const pos = COMBINE_DATA[state.position];
+  const { name, age, heightFt, heightIn, weight, position, percentiles, composite } = state;
+
+  // Header info
+  const el = document.getElementById('scouting-card-header');
+  if (el) {
+    el.innerHTML = `
+      <div class="sc-player-name">${name.toUpperCase()}</div>
+      <div class="sc-meta">
+        <span class="sc-pos-badge">${position}</span>
+        ${age ? `<span class="sc-meta-item">Age ${age}</span>` : ''}
+        ${heightFt ? `<span class="sc-meta-item">${heightFt}'${heightIn || 0}"</span>` : ''}
+        ${weight ? `<span class="sc-meta-item">${weight} lbs</span>` : ''}
+      </div>
+      <div class="sc-position-label">${pos.label}</div>
+    `;
+  }
+
+  // Stats
+  const statsEl = document.getElementById('scouting-stats');
+  if (!statsEl) return;
+
+  const statOrder = ['forty','threeCone','shuttle','vertical','broad','bench'];
+  const rows = statOrder.filter(s => state[s] !== null).map(stat => {
+    const pct   = percentiles[stat];
+    const grade = percentileToGrade(pct);
+    const color = percentileToColor(pct);
+    const pctRounded = pct !== null ? Math.round(pct) : null;
+    return `
+      <div class="sc-stat-row">
+        <span class="sc-stat-name">${STAT_LABELS[stat]}</span>
+        <span class="sc-stat-value">${formatStat(stat, state[stat])}</span>
+        <span class="sc-stat-badge" style="background:${color}20;color:${color};border-color:${color}40">${pctRounded !== null ? ordinal(pctRounded) + ' %ile' : '—'}</span>
+        <span class="sc-stat-grade" style="color:${color}">${grade}</span>
+      </div>
+    `;
+  });
+
+  if (!rows.length) {
+    statsEl.innerHTML = '<p style="color:var(--text-secondary);font-style:italic">No stats entered yet.</p>';
+    return;
+  }
+
+  statsEl.innerHTML = rows.join('');
+
+  // Composite bar
+  const compEl = document.getElementById('sc-composite-bar');
+  if (compEl && composite) {
+    const pct = Math.round(composite.score);
+    compEl.innerHTML = `
+      <div class="sc-comp-label">COMPOSITE GRADE</div>
+      <div class="sc-comp-bar-wrap">
+        <div class="sc-comp-bar" style="width:${pct}%;background:${composite.color}"></div>
+      </div>
+      <div class="sc-comp-grade" style="color:${composite.color}">${composite.grade} — ${composite.label}</div>
+    `;
+  }
+}
+
+// ---------- Radar Section ----------
+function renderRadarSection() {
+  const radarSection = document.getElementById('radar-section');
+  const radarUnlock  = document.getElementById('radar-unlock-msg');
+  const radarWrap    = document.getElementById('radar-chart-wrap');
+
+  const enteredCount = Object.values(state.percentiles).filter(v => v !== null).length;
+  const sizeEntered  = state.weight !== null || state.heightTotal !== null;
+  const totalEntered = enteredCount + (sizeEntered ? 1 : 0);
+
+  const radarAxes = {
+    speed:         state.radar.speed,
+    power:         state.radar.power,
+    explosiveness: state.radar.explosiveness,
+    agility:       state.radar.agility,
+    size:          state.radar.size,
+    athleticism:   state.radar.athleticism
+  };
+
+  const validAxes = Object.values(radarAxes).filter(v => v !== null).length;
+
+  if (validAxes < 3) {
+    if (radarUnlock) radarUnlock.style.display = 'block';
+    if (radarWrap)   radarWrap.style.display   = 'none';
+  } else {
+    if (radarUnlock) radarUnlock.style.display = 'none';
+    if (radarWrap)   radarWrap.style.display   = 'block';
+    renderRadarChart('radar-canvas', radarAxes, state.position);
+  }
+}
+
+// ---------- HOF Comparisons ----------
+function renderHOFComparisons() {
+  const grid = document.getElementById('legends-grid');
+  if (!grid) return;
+
+  const legends = HOF_LEGENDS.filter(l => l.pos === state.position).slice(0, 4);
+
+  const posColors = {
+    QB: '#4a90e2', RB: '#e87b3e', WR: '#9b59b6', TE: '#27ae60',
+    OL: '#8e44ad', DL: '#c0392b', LB: '#16a085', DB: '#d35400', ST: '#2980b9'
+  };
+
+  // Remove any existing early-era footnote
+  const legendsSection = document.getElementById('legends-section');
+  const existingNote = legendsSection ? legendsSection.querySelector('.early-era-footnote') : null;
+  if (existingNote) existingNote.remove();
+
+  if (legends.length === 0) {
+    grid.innerHTML = '<p class="legend-no-data" style="padding:12px 0;">No verified combine data available for notable performers at this position.</p>';
+    return;
+  }
+
+  grid.innerHTML = legends.map(legend => {
+    const initials = legend.name.split(' ').map(w => w[0]).join('').slice(0, 2);
+    const bgColor  = posColors[legend.pos] || '#4a90e2';
+
+    const deltas = ['forty','threeCone','shuttle','vertical','broad','bench']
+      .filter(stat => state[stat] !== null && legend[stat] !== null && legend[stat] !== undefined)
+      .map(stat => {
+        const userVal   = state[stat];
+        const legVal    = legend[stat];
+        const lowerBetter = LOWER_IS_BETTER.includes(stat);
+        const diff      = lowerBetter ? legVal - userVal : userVal - legVal;
+        const pct5      = Math.abs(legVal * 0.05);
+        let medal;
+        if (diff >= 0)           medal = '🥇';
+        else if (-diff <= pct5)  medal = '🥈';
+        else                     medal = '⚪';
+
+        const absDiff = Math.abs(userVal - legVal);
+        const diffStr = lowerBetter
+          ? (userVal < legVal ? `${absDiff.toFixed(2)}s faster` : `${absDiff.toFixed(2)}s slower`)
+          : (userVal > legVal ? `+${absDiff.toFixed(2)} better`  : `${absDiff.toFixed(2)} behind`);
+
+        return `<div class="legend-delta">
+          <span class="ld-medal">${medal}</span>
+          <span class="ld-stat">${STAT_LABELS[stat]}: <strong>You ${formatStat(stat, userVal)}</strong> | ${legend.name.split(' ').pop()} ${formatStat(stat, legVal)}</span>
+          <span class="ld-diff">(${diffStr})</span>
+        </div>`;
+      });
+
+    return `
+      <div class="legend-card">
+        <div class="legend-card-header">
+          <div class="legend-initials" style="background:${bgColor}">${initials}</div>
+          <div class="legend-info">
+            <div class="legend-name">${legend.name}</div>
+            <div class="legend-pos-era">${legend.pos} · ${legend.era}</div>
+          </div>
+        </div>
+        ${deltas.length ? `<div class="legend-deltas">${deltas.join('')}</div>` : '<div class="legend-no-data">No matching stats to compare.</div>'}
+        <div class="legend-note"><em>${legend.note}</em></div>
+      </div>
+    `;
+  }).join('');
+
+  // Early-era footnote
+  const hasEarlyEra = legends.some(l => l.era && l.era.includes('Early Era'));
+  if (hasEarlyEra && legendsSection) {
+    const note = document.createElement('p');
+    note.className = 'early-era-footnote';
+    note.textContent = '* Early Era (pre-1995): combine documentation was limited. Times may be hand-timed.';
+    legendsSection.appendChild(note);
+  }
+}
+
+// ---------- Athlete Match ----------
+function calcLegendSimilarity(userPercentiles, legend, position) {
+  const statKeys = ['forty', 'vertical', 'broad', 'bench', 'threeCone', 'shuttle'];
+  let sumSquares = 0;
+  let count = 0;
+  for (const stat of statKeys) {
+    const userPct  = userPercentiles[stat];
+    const legendVal = legend[stat];
+    if (userPct !== null && userPct !== undefined && legendVal !== null && legendVal !== undefined) {
+      const pos = COMBINE_DATA[position];
+      const legendPct = calcPercentile(legendVal, pos.avg[stat], pos.elite[stat], LOWER_IS_BETTER.includes(stat));
+      sumSquares += Math.pow(userPct - legendPct, 2);
+      count++;
+    }
+  }
+  return count === 0 ? Infinity : Math.sqrt(sumSquares / count);
+}
+
+function findClosestLegend(userPercentiles, position) {
+  const samePosLegends = HOF_LEGENDS.filter(l => l.pos === position);
+  const pool = samePosLegends.length > 0 ? samePosLegends : HOF_LEGENDS;
+  let best = null;
+  let bestScore = Infinity;
+  for (const legend of pool) {
+    const score = calcLegendSimilarity(userPercentiles, legend, position);
+    if (score < bestScore) { bestScore = score; best = legend; }
+  }
+  return best;
+}
+
+function generateMatchDescription(legend, userPercentiles, position) {
+  if (!legend) return '';
+  const statKeys = ['forty', 'vertical', 'broad', 'bench', 'threeCone', 'shuttle'];
+  const pos = COMBINE_DATA[position];
+  let closestStat = null;
+  let smallestDiff = Infinity;
+  for (const stat of statKeys) {
+    if (userPercentiles[stat] == null || legend[stat] == null) continue;
+    const legendPct = calcPercentile(legend[stat], pos.avg[stat], pos.elite[stat], LOWER_IS_BETTER.includes(stat));
+    const diff = Math.abs(userPercentiles[stat] - legendPct);
+    if (diff < smallestDiff) { smallestDiff = diff; closestStat = stat; }
+  }
+  const last = legend.name.split(' ').pop();
+  const templates = {
+    forty:     `Like ${last}, your straight-line speed is your standout attribute. Elite burst is what separates top prospects.`,
+    vertical:  `Like ${last}, your lower-body explosiveness is a standout. That vertical power translates directly to the field.`,
+    broad:     `Like ${last}, you generate exceptional horizontal power — your broad jump profile shows game-changing explosion.`,
+    bench:     `Like ${last}, your strength numbers are a highlight. That upper-body power shows up in every physical rep.`,
+    threeCone: `Like ${last}, your change-of-direction quickness is a key strength. Elite 3-cone athletes consistently over-perform.`,
+    shuttle:   `Like ${last}, your short-area lateral burst stands out. That type of first-step quickness is hard to coach.`
+  };
+  const base = (closestStat && templates[closestStat]) ? templates[closestStat] : '';
+  return `${base} Your overall athletic profile most closely mirrors ${legend.name}'s ${legend.year || legend.era} combine performance.`.trim();
+}
+
+function renderAthleteMatch() {
+  const bar = document.getElementById('athlete-match-bar');
+  if (!bar) return;
+
+  if (!Object.keys(state.percentiles).length) { bar.style.display = 'none'; return; }
+
+  const legend = findClosestLegend(state.percentiles, state.position);
+  if (!legend) { bar.style.display = 'none'; return; }
+
+  state.athleteMatch = legend;
+  bar.style.display = '';
+
+  const desc = generateMatchDescription(legend, state.percentiles, state.position);
+  const posColors = {
+    QB:'#4a90e2', RB:'#e87b3e', WR:'#9b59b6', TE:'#27ae60',
+    OL:'#8e44ad', DL:'#c0392b', LB:'#16a085', DB:'#d35400', ST:'#2980b9'
+  };
+  const badgeColor = posColors[legend.pos] || '#4a90e2';
+
+  bar.innerHTML = `
+    <div class="am-left">
+      <div class="am-eyebrow">YOUR ATHLETE MATCH</div>
+      <div class="am-name">${legend.name.toUpperCase()}</div>
+      <div class="am-meta">
+        <span class="am-pos-badge" style="background:${badgeColor}">${legend.pos}</span>
+        <span class="am-era">${legend.era} · ${legend.year || ''}</span>
+      </div>
+    </div>
+    <div class="am-right">
+      <div class="am-desc">${desc}</div>
+    </div>
+  `;
+}
+
+// ---------- Size Profile ----------
+function fmtInchHeight(totalInches) {
+  const ft = Math.floor(totalInches / 12);
+  const rem = totalInches % 12;
+  return `${ft}'${rem}"`;
+}
+
+function renderSizeProfile() {
+  const section = document.getElementById('size-profile-section');
+  if (!section) return;
+  const pos = COMBINE_DATA[state.position];
+  const { heightFt, heightIn: hIn, heightTotal, weight, armLength, handSize } = state;
+
+  function makeCard(label, displayVal, numVal, avgVal, eliteVal, fmtAvg, neutral, infoOnly) {
+    // neutral=true means weight — show bar neutrally, no percentile badge
+    const pct = (!neutral && numVal !== null) ? calcSizePercentile(numVal, avgVal, eliteVal) : null;
+    const color = neutral ? 'var(--gold)' : (pct !== null ? percentileToColor(pct) : 'var(--gold)');
+    const barPct = pct !== null ? Math.max(2, Math.min(100, pct)) : (numVal !== null && !neutral ? 2 : 0);
+    const barColor = neutral ? 'var(--text-secondary)' : color;
+
+    if (numVal === null) {
+      return `
+        <div class="sp-card">
+          <div class="sp-card-label">${label}</div>
+          <div class="sp-card-value sp-card-empty">—</div>
+          <div class="sp-card-avg">Pos Avg: ${fmtAvg(avgVal)}</div>
+          ${infoOnly ? '<div class="sp-card-note">Enter on form to see full profile</div>' : ''}
+        </div>`;
+    }
+
+    return `
+      <div class="sp-card">
+        <div class="sp-card-label">${label}</div>
+        <div class="sp-card-value" style="color:${color}">${displayVal}</div>
+        <div class="sp-card-avg">Pos Avg: ${fmtAvg(avgVal)}</div>
+        <div class="sp-bar-track">
+          <div class="sp-bar-fill" style="width:${barPct}%;background:${barColor}"></div>
+        </div>
+        <div class="sp-percentile" style="color:${barColor}">${pct !== null ? ordinal(Math.round(pct)) + ' %ile' : ''}</div>
+        ${neutral ? '<div class="sp-card-note">Weight shown for comparison only — ideal varies by role.</div>' : ''}
+        ${infoOnly ? '<div class="sp-card-note">Longer/larger preferred by scouts — not weighted in grade.</div>' : ''}
+      </div>`;
+  }
+
+  const heightDisplay = (heightFt && heightFt > 0) ? fmtInchHeight(heightTotal) : null;
+  const heightNum     = (heightFt && heightFt > 0) ? heightTotal : null;
+
+  const hCard    = makeCard('Height',      heightDisplay,                   heightNum,   pos.avg.heightIn,    pos.elite.heightIn,    fmtInchHeight, false, false);
+  const wCard    = makeCard('Weight',      weight ? `${weight} lbs` : null, weight,      pos.avg.weightLbs,   pos.elite.weightLbs,   v => `${v} lbs`, true, false);
+  const aCard    = makeCard('Arm Length',  armLength ? `${armLength}"` : null, armLength, pos.avg.armLengthIn, pos.elite.armLengthIn, v => `${v}"`, false, true);
+  const handCard = makeCard('Hand Size',   handSize ? `${handSize}"` : null,  handSize,  pos.avg.handSizeIn,  pos.elite.handSizeIn,  v => `${v}"`, false, true);
+
+  section.innerHTML = `
+    <div class="sp-section">
+      <div class="section-heading">SIZE PROFILE</div>
+      <div class="sp-grid">
+        ${hCard}
+        ${wCard}
+        ${aCard}
+        ${handCard}
+      </div>
+    </div>
+  `;
+}
+
+// ---------- You vs. Average Combine Athlete ----------
+function getEraAvg(stat) {
+  const eraKey = state.era || '2000-2025';
+  const eraData = ERA_DATA[eraKey];
+  if (!eraData || !eraData[state.position]) {
+    return COMBINE_DATA[state.position].avg[stat];
+  }
+  return eraData[state.position][stat] ?? COMBINE_DATA[state.position].avg[stat];
+}
+
+function renderAvgComparison() {
+  const section = document.getElementById('avg-comparison-section');
+  const eraSection = document.getElementById('era-controls-section');
+  if (!section) return;
+
+  const statOrder = ['forty', 'threeCone', 'shuttle', 'vertical', 'broad', 'bench'];
+  const entered = statOrder.filter(s => state[s] !== null);
+
+  if (!entered.length) {
+    section.innerHTML = '';
+    if (eraSection) eraSection.style.display = 'none';
+    return;
+  }
+
+  if (eraSection) eraSection.style.display = '';
+
+  const eraKey = state.era || '2000-2025';
+  const eraLabel = document.getElementById('era-select')
+    ? document.getElementById('era-select').options[document.getElementById('era-select').selectedIndex].text
+    : 'All-Time Average';
+
+  let beatCount = 0;
+  const rows = entered.map(stat => {
+    const userVal = state[stat];
+    const avgVal  = getEraAvg(stat);
+    const isLower = LOWER_IS_BETTER.includes(stat);
+    const beats   = isLower ? userVal < avgVal : userVal > avgVal;
+    if (beats) beatCount++;
+
+    const rawDiff = Math.abs(userVal - avgVal);
+    let diffStr;
+    if (stat === 'bench') {
+      const d = Math.round(rawDiff);
+      diffStr = beats ? `+${d} reps` : `-${d} reps`;
+    } else if (stat === 'vertical' || stat === 'broad') {
+      const d = rawDiff.toFixed(1);
+      diffStr = beats ? `+${d}"` : `-${d}"`;
+    } else {
+      const d = rawDiff.toFixed(2);
+      diffStr = isLower
+        ? (beats ? `${d}s faster` : `${d}s slower`)
+        : (beats ? `+${d}` : `-${d}`);
+    }
+
+    const icon  = beats ? '✅' : '❌';
+    const color = beats ? '#00c851' : '#ff1744';
+    const posLabel = COMBINE_DATA[state.position].label.split(' ')[0];
+
+    return `
+      <div class="avg-row">
+        <div class="avg-cell avg-stat-name">${STAT_LABELS[stat]}</div>
+        <div class="avg-cell avg-you">${formatStat(stat, userVal)}</div>
+        <div class="avg-cell avg-pos-avg">${formatStat(stat, avgVal)} <span class="avg-pos-label">(${posLabel} avg)</span></div>
+        <div class="avg-cell avg-diff" style="color:${color}">${icon} ${diffStr}</div>
+      </div>
+    `;
+  }).join('');
+
+  section.innerHTML = `
+    <div class="avg-comparison-card">
+      <div class="avg-comparison-heading">YOU VS. THE AVERAGE COMBINE ATHLETE</div>
+      <div class="avg-comparison-table">
+        <div class="avg-row avg-header-row">
+          <div class="avg-cell">Stat</div>
+          <div class="avg-cell">You</div>
+          <div class="avg-cell">Pos Average</div>
+          <div class="avg-cell">Difference</div>
+        </div>
+        ${rows}
+      </div>
+      <div class="avg-summary">You beat the position average in <strong>${beatCount}</strong> out of <strong>${entered.length}</strong> measured categories.</div>
+    </div>
+  `;
+}
+
+function initEraDropdown() {
+  const select = document.getElementById('era-select');
+  if (!select) return;
+  select.addEventListener('change', () => {
+    state.era = select.value;
+    renderAvgComparison();
+  });
+}
+
+// ---------- Leaderboard ----------
+function renderLeaderboard() {
+  const container = document.getElementById('leaderboard-content');
+  if (!container) return;
+
+  const statOrder = ['forty','threeCone','shuttle','vertical','broad','bench'];
+  const entered   = statOrder.filter(s => state[s] !== null);
+
+  if (!entered.length) {
+    container.innerHTML = '<p style="color:var(--text-secondary);text-align:center">Enter stats to see how you stack up against the all-time greats.</p>';
+    return;
+  }
+
+  const fmtLb = (stat, v) => {
+    if (stat === 'broad' && v != null) {
+      return `${v}" (${Math.floor(v / 12)}'${v % 12}")`;
+    }
+    return formatStat(stat, v);
+  };
+
+  container.innerHTML = entered.map(stat => {
+    const records = ALL_TIME_RECORDS[stat];
+    if (!records) return '';
+    const displayCount = stat === 'forty' ? 10 : 5;
+    const topRecords   = records.slice(0, displayCount);
+    const userVal   = state[stat];
+    const lowerBetter = LOWER_IS_BETTER.includes(stat);
+    const best      = topRecords[0].value;
+
+    // Find user's approximate rank
+    let rank = records.findIndex(r => lowerBetter ? userVal <= r.value : userVal >= r.value) + 1;
+    if (rank === 0) rank = records.length + 1;
+    const rankLabel = rank <= records.length ? `#${rank} all-time` : `Outside top ${records.length}`;
+
+    // Mini bar: user / best
+    const barPct = lowerBetter
+      ? Math.min(100, Math.max(5, (best / userVal) * 100))
+      : Math.min(100, Math.max(5, (userVal / best) * 100));
+
+    return `
+      <div class="lb-stat-block">
+        <div class="lb-stat-title">${STAT_LABELS[stat]}</div>
+        <div class="lb-records">
+          ${topRecords.map((r, i) => `
+            <div class="lb-record-row">
+              <span class="lb-rank">#${i + 1}</span>
+              <span class="lb-name">${r.name}</span>
+              <span class="lb-pos-tag">${r.pos}</span>
+              <span class="lb-val">${fmtLb(stat, r.value)}</span>
+              <span class="lb-year">${r.year}</span>
+              ${r.year === 2026 ? '<span class="badge-2026">2026 ★</span>' : ''}
+            </div>
+            ${r.note ? `<div class="lb-record-note">${r.note}</div>` : ''}
+          `).join('')}
+        </div>
+        ${stat === 'forty' ? `<p class="lb-forty-note"><em>All-time records reflect official electronically-timed results (1999–present). Pre-1999 times (e.g. Deion Sanders, 1989) were hand-timed and are not included in the official database.</em></p>` : ''}
+        <div class="lb-user-row">
+          <div class="lb-mini-bar-wrap">
+            <div class="lb-bar-label">
+              <span>#1: ${topRecords[0].name} ${fmtLb(stat, best)}</span>
+              <span>You: ${fmtLb(stat, userVal)} (${rankLabel})</span>
+            </div>
+            <div class="lb-mini-bar-track">
+              <div class="lb-mini-bar-fill" style="width:${barPct}%"></div>
+              <div class="lb-user-marker" style="left:${barPct}%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ---------- Training Recommendations ----------
+function renderTrainingRecs() {
+  const container = document.getElementById('training-content');
+  if (!container) return;
+
+  const pcts    = state.percentiles;
+  const entered = Object.entries(pcts).filter(([, v]) => v !== null);
+
+  if (entered.length < 1) {
+    container.innerHTML = '<p style="color:var(--text-secondary);text-align:center">Enter speed, agility, or strength stats to get your personalized training roadmap.</p>';
+    return;
+  }
+
+  // Find 2 lowest percentile stats (all from whatever was entered)
+  const sorted  = [...entered].sort((a, b) => a[1] - b[1]);
+  const weakest = sorted.slice(0, 2);
+
+  const onlyOne = entered.length === 1;
+
+  container.innerHTML = weakest.map(([stat, pct]) => {
+    const rec   = TRAINING_RECS[stat];
+    if (!rec) return '';
+    const pos   = COMBINE_DATA[state.position];
+    const elite = pos.elite[stat];
+    const userVal = state[stat];
+    const lowerBetter = LOWER_IS_BETTER.includes(stat);
+    const diff = lowerBetter
+      ? (userVal - elite).toFixed(2) + 's faster needed'
+      : (elite - userVal).toFixed(1) + `${STAT_UNITS[stat] || ''} needed`;
+    const pctRound = Math.round(pct);
+    const color = percentileToColor(pct);
+    const barFill = Math.max(2, Math.min(100, pctRound));
+    const elitePct = 90;
+
+    return `
+      <div class="training-card">
+        <div class="training-card-header">
+          <div class="training-stat-name">${rec.title}</div>
+          <div class="training-percentile" style="color:${color}">${ordinal(pctRound)} percentile</div>
+        </div>
+        <div class="training-progress-wrap">
+          <div class="training-progress-labels">
+            <span style="color:${color}">Current: ${ordinal(pctRound)} %ile</span>
+            <span style="color:var(--grade-elite)">Elite: ${ordinal(elitePct)} %ile</span>
+          </div>
+          <div class="training-progress-track">
+            <div class="training-progress-fill" style="width:${barFill}%;background:${color}"></div>
+            <div class="training-elite-marker" style="left:${elitePct}%"></div>
+          </div>
+        </div>
+        <div class="training-gap">
+          You need to improve by <strong>${diff}</strong> to reach elite level for ${COMBINE_DATA[state.position].label}s.
+        </div>
+        <div class="training-drills">
+          ${rec.drills.slice(0, 3).map(d => `
+            <div class="training-drill">
+              <div class="drill-name">${d.name}</div>
+              <div class="drill-desc">${d.desc}</div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="pro-tip-box">
+          <strong>PRO TIP:</strong> ${rec.target_note}
+        </div>
+      </div>
+    `;
+  }).join('') + (onlyOne ? '<p class="training-more-msg">Enter more measurements to get a full training plan.</p>' : '');
+}
+
+// ---------- Compare to Any Player ----------
+function initPlayerCompare() {
+  const sel = document.getElementById('compare-player-select');
+  if (!sel) return;
+
+  // Group legends by position
+  const POS_ORDER = ['QB','RB','WR','TE','OL','DL','LB','DB','ST'];
+  const byPos = {};
+  POS_ORDER.forEach(p => { byPos[p] = []; });
+  HOF_LEGENDS.forEach((l, idx) => {
+    if (byPos[l.pos]) byPos[l.pos].push({ ...l, _idx: idx });
+  });
+
+  sel.innerHTML = POS_ORDER.map(pos => {
+    const players = byPos[pos];
+    if (!players.length) return '';
+    return `<optgroup label="${pos}">${
+      players.map(l => `<option value="${l._idx}">${l.name} (${l.pos}, ${l.year || l.era})</option>`).join('')
+    }</optgroup>`;
+  }).join('');
+
+  // Default to first player in user's position group, fallback to index 0
+  const samePos = HOF_LEGENDS.findIndex(l => l.pos === state.position);
+  sel.value = samePos >= 0 ? samePos : 0;
+
+  sel.addEventListener('change', renderPlayerCompareCard);
+  renderPlayerCompareCard();
+}
+
+function renderPlayerCompareCard() {
+  const card = document.getElementById('player-compare-card');
+  const sel  = document.getElementById('compare-player-select');
+  if (!card || !sel) return;
+
+  const legend = HOF_LEGENDS[parseInt(sel.value, 10)];
+  if (!legend) { card.innerHTML = ''; return; }
+
+  const statOrder   = ['forty','threeCone','shuttle','vertical','broad','bench'];
+  const userEntered = statOrder.filter(s => state[s] !== null);
+
+  if (!userEntered.length) {
+    card.innerHTML = '<p class="pc-empty">Enter your combine stats to compare.</p>';
+    return;
+  }
+
+  const isCrossPos = legend.pos !== state.position;
+  const crossNote  = isCrossPos
+    ? `<p class="pc-cross-note">Note: ${legend.name} played ${legend.pos} — comparing raw athletic measurements only, not position context.</p>`
+    : '';
+
+  const rows = userEntered.map(stat => {
+    const userVal  = state[stat];
+    const legVal   = legend[stat];
+    const lower    = LOWER_IS_BETTER.includes(stat);
+    const label    = STAT_LABELS[stat];
+    const userFmt  = formatStat(stat, userVal);
+
+    if (legVal === null || legVal === undefined) {
+      return `
+        <div class="pc-row">
+          <span class="pc-stat-name">${label}</span>
+          <span class="pc-you">${userFmt}</span>
+          <span class="pc-them pc-na">N/A</span>
+          <span class="pc-diff pc-nodata">(no data)</span>
+        </div>`;
+    }
+
+    const legFmt  = formatStat(stat, legVal);
+    const rawDiff = userVal - legVal;
+    const ahead   = lower ? rawDiff < 0 : rawDiff > 0;
+    const absDiff = Math.abs(rawDiff);
+    const unit    = ['forty','threeCone','shuttle'].includes(stat) ? 's' : ['vertical','broad'].includes(stat) ? '"' : ' reps';
+    const diffStr = ahead
+      ? `+${absDiff.toFixed(stat === 'bench' ? 0 : 2)}${unit} better`
+      : `-${absDiff.toFixed(stat === 'bench' ? 0 : 2)}${unit} ${lower ? 'slower' : 'lower'}`;
+    const diffColor = ahead ? 'var(--grade-elite)' : 'var(--grade-poor)';
+
+    return `
+      <div class="pc-row">
+        <span class="pc-stat-name">${label}</span>
+        <span class="pc-you">${userFmt}</span>
+        <span class="pc-them">${legFmt}</span>
+        <span class="pc-diff" style="color:${diffColor}">${diffStr}</span>
+      </div>`;
+  }).join('');
+
+  // Calculate legend's estimated grade at user's position (or legend's own position if cross-pos)
+  const evalPos  = isCrossPos ? legend.pos : state.position;
+  const posData  = COMBINE_DATA[evalPos];
+  const legPcts  = {};
+  statOrder.forEach(stat => {
+    if (legend[stat] !== null && legend[stat] !== undefined) {
+      legPcts[stat] = calcPercentile(legend[stat], posData.avg[stat], posData.elite[stat], LOWER_IS_BETTER.includes(stat));
+    } else {
+      legPcts[stat] = null;
+    }
+  });
+  const legComposite = calcCompositeGrade(legPcts, evalPos);
+  const userGrade    = state.composite;
+
+  const gradeRow = (userGrade && legComposite) ? `
+    <div class="pc-grade-row">
+      <span>Your overall grade (${state.position}): <strong style="color:${userGrade.color}">${userGrade.grade} — ${userGrade.label}</strong></span>
+      <span>${legend.name}'s estimated grade (${evalPos}): <strong style="color:${legComposite.color}">${legComposite.grade} — ${legComposite.label}</strong></span>
+    </div>` : '';
+
+  const kelceNote = (legend.name === 'Travis Kelce')
+    ? `<p class="pc-proday-note">* Pro Day results, not official NFL Combine.</p>`
+    : '';
+
+  card.innerHTML = `
+    <div class="pc-card">
+      <div class="pc-header">
+        <span class="pc-you-label">YOU</span>
+        <span class="pc-vs">vs</span>
+        <span class="pc-them-label">${legend.name.toUpperCase()} (${legend.pos}, ${legend.year || legend.era})</span>
+      </div>
+      <div class="pc-header-row pc-row">
+        <span class="pc-stat-name">STAT</span>
+        <span class="pc-you">YOU</span>
+        <span class="pc-them">${legend.name.split(' ').pop().toUpperCase()}</span>
+        <span class="pc-diff">DIFFERENCE</span>
+      </div>
+      ${rows}
+      ${gradeRow}
+      ${kelceNote}
+      ${crossNote}
+      <div class="pc-funfact">"${legend.note}"</div>
+    </div>`;
+}
+
+// ---------- Share Card ----------
+function renderShareCard() {
+  const card = document.getElementById('share-card');
+  if (!card) return;
+
+  const pos = COMBINE_DATA[state.position];
+  const { name, position, composite, percentiles } = state;
+
+  const statOrder = ['forty','vertical','broad','bench','threeCone','shuttle'];
+  const entered = statOrder.filter(s => state[s] !== null);
+
+  // Build stat rows (all entered stats)
+  const statRowsHtml = entered.map(stat => {
+    const pct   = percentiles[stat];
+    const color = percentileToColor(pct);
+    const pctNum = pct !== null ? Math.round(pct) : null;
+    return `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+        <span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#9ab0cc;width:130px;">${STAT_LABELS[stat]}</span>
+        <span style="font-family:'Bebas Neue',Impact,sans-serif;font-size:20px;color:#fff;flex:1;text-align:center;">${formatStat(stat, state[stat])}</span>
+        ${pctNum !== null ? `<span style="font-size:11px;font-weight:700;background:${color}22;color:${color};border:1px solid ${color}55;border-radius:100px;padding:2px 8px;white-space:nowrap;">${ordinal(pctNum)} %ile</span>` : ''}
+      </div>`;
+  }).join('');
+
+  // Best metric row
+  let bestStatHtml = '';
+  if (entered.length) {
+    const bestStat = entered.reduce((best, s) =>
+      (percentiles[s] || 0) > (percentiles[best] || 0) ? s : best, entered[0]);
+    const bPct = percentiles[bestStat];
+    if (bPct !== null) {
+      const bColor = percentileToColor(bPct);
+      bestStatHtml = `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;background:rgba(200,168,61,0.06);border-radius:4px;padding:8px;margin-top:4px;">
+          <span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#c8a83d;">★ BEST</span>
+          <span style="font-size:11px;text-transform:uppercase;color:#c8a83d;flex:1;text-align:center;">${STAT_LABELS[bestStat]}</span>
+          <span style="font-family:'Bebas Neue',Impact,sans-serif;font-size:20px;color:#fff;">${formatStat(bestStat, state[bestStat])}</span>
+          <span style="font-size:11px;font-weight:700;background:${bColor}22;color:${bColor};border:1px solid ${bColor}55;border-radius:100px;padding:2px 8px;margin-left:8px;">${ordinal(Math.round(bPct))} %ile</span>
+        </div>`;
+    }
+  }
+
+  // Athlete match section
+  const match = state.athleteMatch;
+  const matchHtml = match ? `
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(200,168,61,0.3);">
+      <div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#9ab0cc;margin-bottom:4px;">⚡ YOUR ATHLETE MATCH</div>
+      <div style="font-family:'Bebas Neue',Impact,sans-serif;font-size:32px;color:#c8a83d;line-height:1;">${match.name.toUpperCase()}</div>
+      <div style="font-size:11px;color:#9ab0cc;margin-top:2px;">${match.pos} · ${match.era} ${match.year ? '· ' + match.year : ''}</div>
+    </div>` : '';
+
+  card.innerHTML = `
+    <div style="font-family:'Bebas Neue',Impact,sans-serif;font-size:13px;letter-spacing:0.18em;color:#c8a83d;text-align:center;padding-bottom:12px;border-bottom:1px solid rgba(200,168,61,0.3);margin-bottom:20px;">NFL COMBINE COMPARISON TOOL</div>
+
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="display:inline-block;background:#c8a83d;color:#0a1628;font-family:'Bebas Neue',Impact,sans-serif;font-size:11px;letter-spacing:0.12em;padding:3px 14px;border-radius:100px;margin-bottom:10px;">${pos.label.toUpperCase()}</div>
+      <div style="font-family:'Bebas Neue',Impact,sans-serif;font-size:52px;color:#fff;line-height:1;">${name.toUpperCase()}</div>
+    </div>
+
+    <div style="border:2px solid ${composite ? composite.color : '#c8a83d'};border-radius:12px;padding:20px;text-align:center;margin-bottom:24px;">
+      <div style="font-family:'Bebas Neue',Impact,sans-serif;font-size:80px;color:${composite ? composite.color : '#c8a83d'};line-height:1;">${composite ? composite.grade : '—'}</div>
+      <div style="font-family:'Bebas Neue',Impact,sans-serif;font-size:16px;letter-spacing:0.1em;color:${composite ? composite.color : '#c8a83d'};">${composite ? composite.label : 'OVERALL'}</div>
+    </div>
+
+    <div style="font-family:'Bebas Neue',Impact,sans-serif;font-size:11px;letter-spacing:0.15em;color:#c8a83d;padding-bottom:8px;border-bottom:1px solid rgba(200,168,61,0.3);margin-bottom:8px;">── KEY METRICS ──────────────────────────</div>
+
+    ${statRowsHtml || '<div style="color:#9ab0cc;font-style:italic;text-align:center;padding:20px 0;">No stats entered</div>'}
+    ${bestStatHtml}
+    ${matchHtml}
+
+    <div style="text-align:center;margin-top:auto;padding-top:16px;font-size:11px;color:#2a4060;letter-spacing:0.1em;">nflcombine.tool</div>
+  `;
+}
+
+// ---------- Easter Eggs ----------
+function checkEasterEggs() {
+  const egg = document.getElementById('jerry-rice-easter-egg');
+  if (!egg) return;
+  if (state.position === 'WR' && state.forty !== null && state.forty > 4.71) {
+    egg.style.display = 'block';
+  } else {
+    egg.style.display = 'none';
+  }
+}
+
+// ---------- Animated Counters ----------
+function animateCounter(el, target, duration = 800, decimals = 0) {
+  const start = performance.now();
+  const update = time => {
+    const progress = Math.min((time - start) / duration, 1);
+    const eased    = 1 - Math.pow(1 - progress, 3);
+    const val      = eased * target;
+    el.textContent = decimals > 0 ? val.toFixed(decimals) : Math.round(val);
+    if (progress < 1) requestAnimationFrame(update);
+  };
+  requestAnimationFrame(update);
+}
+
+function animateAllCounters() {
+  document.querySelectorAll('[data-count-to]').forEach(el => {
+    const target   = parseFloat(el.dataset.countTo);
+    const decimals = parseInt(el.dataset.decimals || '0');
+    animateCounter(el, target, 800, decimals);
+  });
+}
+
+// ---------- Utility ----------
+function setText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+
+// ---------- Tooltip Init ----------
+function initTooltips() {
+  document.querySelectorAll('[data-tip]').forEach(icon => {
+    icon.addEventListener('mouseenter', e => {
+      const tip = document.createElement('div');
+      tip.className = 'tooltip-popup';
+      tip.textContent = icon.dataset.tip;
+      document.body.appendChild(tip);
+      const rect = icon.getBoundingClientRect();
+      tip.style.top  = (rect.bottom + window.scrollY + 6) + 'px';
+      tip.style.left = (rect.left + window.scrollX) + 'px';
+      icon._tip = tip;
+    });
+    icon.addEventListener('mouseleave', () => {
+      if (icon._tip) { icon._tip.remove(); icon._tip = null; }
+    });
+  });
+}
+
+// ---------- Height Dropdown Builder ----------
+function buildHeightDropdowns() {
+  const ftSel  = document.getElementById('height-ft');
+  const inSel  = document.getElementById('height-in');
+  if (!ftSel || !inSel) return;
+
+  for (let f = 4; f <= 7; f++) {
+    const opt = document.createElement('option');
+    opt.value = f; opt.textContent = f + "'";
+    if (f === 5) opt.selected = true;
+    ftSel.appendChild(opt);
+  }
+  for (let i = 0; i <= 11; i++) {
+    const opt = document.createElement('option');
+    opt.value = i; opt.textContent = i + '"';
+    if (i === 0) opt.selected = true;
+    inSel.appendChild(opt);
+  }
+}
+
+// ---------- Init ----------
+window.addEventListener('DOMContentLoaded', () => {
+  buildPositionGrid();
+  initAccordions();
+  initRMCalc();
+  initValidation();
+  initGenerateBtn();
+  buildHeightDropdowns();
+  initTooltips();
+  initEraDropdown();
+
+  // Navigation
+  document.getElementById('btn-start')?.addEventListener('click',
+    () => showScreen('screen-position'));
+  document.getElementById('btn-back-to-landing')?.addEventListener('click',
+    () => showScreen('screen-landing'));
+  document.getElementById('btn-back-to-position')?.addEventListener('click',
+    () => showScreen('screen-position'));
+
+  document.getElementById('btn-generate')?.addEventListener('click', () => {
+    generateResults();
+  });
+
+  document.getElementById('btn-retry')?.addEventListener('click', () => {
+    showScreen('screen-position');
+  });
+
+  document.getElementById('btn-edit')?.addEventListener('click', () => {
+    showScreen('screen-form');
+  });
+
+  document.getElementById('btn-pdf')?.addEventListener('click', () => {
+    downloadPDF(state.name || 'player');
+  });
+
+  document.getElementById('btn-share')?.addEventListener('click', () => {
+    downloadShareCard(state.name || 'player');
+  });
+});
+
+</script>
+
+</body>
+</html>
